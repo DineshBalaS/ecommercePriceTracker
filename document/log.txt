@@ -1,0 +1,126 @@
+# E-commerce Price Tracker Project Log
+
+## Objective
+
+Develop a full-stack web application that monitors prices of products across various e-commerce websites and notifies users when prices drop below a certain threshold.
+
+## Tech Stack
+
+* **Backend**: FastAPI
+* **Frontend**: React + Tailwind CSS
+* **Scraping**: BeautifulSoup / Playwright / Selenium
+* **Database**: MongoDB or PostgreSQL (TBD)
+* **DevOps**: Docker, CI/CD, optional Kubernetes deployment
+* **Notifications**: Email via SMTP / Push (TBD)
+
+---
+
+## Phase 1: Planning
+
+**Start Date:** 2025-05-30
+
+### Key Features
+
+1. User Registration & Login
+2. Product Tracker (Add product URLs, set desired price)
+3. Scheduled Scraping (Monitor product prices regularly)
+4. Price Drop Alerts (via email/notifications)
+5. Dashboard to view tracked products and current prices
+6. Graphs for price history trends (per product)
+
+### Target Sites for Scraping (tentative)
+
+* Amazon (caution: bot protection)
+* Flipkart
+* Croma
+* Reliance Digital
+* Public APIs (if any)
+
+---
+
+## Phase 2: Setup
+
+**Status:** Not started
+
+### Tasks
+
+* [ ] Set up project repo & file structure
+* [ ] Initialize FastAPI backend with basic routes
+* [ ] Set up React frontend with Tailwind CSS
+* [ ] Containerize backend and frontend with Docker
+* [ ] Configure MongoDB/PostgreSQL connection
+
+---
+
+## Phase 3: Core Backend Logic
+
+**Status:** Pending
+
+### Tasks
+
+* [ ] Build user model and auth system
+* [ ] Implement product tracking model
+* [ ] Develop scraping module for target websites
+* [ ] Schedule scraping jobs using Celery/APScheduler
+* [ ] Integrate email/notification system
+
+---
+
+## Phase 4: Frontend Development
+
+**Status:** Pending
+
+### Tasks
+
+* [ ] Auth UI (login/signup)
+* [ ] Dashboard to view tracked products
+* [ ] Forms for adding/editing tracked products
+
+---
+
+## Phase 5: Deployment
+
+**Status:** Pending
+
+### Tasks
+
+* [ ] CI/CD Pipeline (GitHub Actions)
+* [ ] Docker Compose for local dev
+* [ ] Production deployment (Render/AWS/DigitalOcean)
+
+---
+
+## Notes
+
+* Explore usage of rotating user agents/proxies if bot detection becomes a problem
+* Document all endpoints and create OpenAPI docs via FastAPI
+* Include retry/failure handling in scraping logic
+* Ensure legal/ethical scraping by reviewing site ToS
+
+Project folder structure :- 
+ecommerce-price-tracker/
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── models/
+│   │   │   └── user.py, product.py
+│   │   ├── routes/
+│   │   │   └── auth.py, product.py
+│   │   ├── services/
+│   │   │   └── scraper.py, notification.py
+│   │   └── config.py
+│   ├── requirements.txt
+│   └── Dockerfile
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── App.jsx
+│   ├── tailwind.config.js
+│   ├── package.json
+│   └── Dockerfile
+├── docker-compose.yml
+├── .env (for secrets)
+└── README.md
+

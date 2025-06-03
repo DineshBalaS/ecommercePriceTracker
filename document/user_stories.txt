@@ -1,0 +1,11 @@
+As a user, I can register and log in securely.
+
+As a user, I can track the price of a product by submitting its URL and desired price.
+
+As a user, I receive an alert when the price drops below the threshold.
+
+As a user, I can maintain a list of products that I'm planning to buy
+
+As a user, I can mark whether I have bought the product or not or if i am skipping it 
+
+As a user, I can maintain a list of products that I want to save for later
