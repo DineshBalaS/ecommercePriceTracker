@@ -40,7 +40,7 @@ Develop a full-stack web application that monitors prices of products across var
 
 ## Phase 2: Setup
 
-**Status:** In Progress ✅
+**Status:** Done ✅
 
 ### Tasks
 
@@ -48,7 +48,7 @@ Develop a full-stack web application that monitors prices of products across var
 * [x] Initialize FastAPI backend with basic routes
 * [x] Set up React frontend with Tailwind CSS
 * [x] Containerize backend and frontend with Docker
-* [ ] Configure MongoDB/PostgreSQL connection
+* [x] Configure MongoDB/PostgreSQL connection
 
 ---
 
