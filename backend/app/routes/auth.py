@@ -6,13 +6,13 @@ from backend.app.services.auth_utils import (
 )
 from backend.app.config import db
 from datetime import timedelta
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, APIKeyHeader
 from datetime import datetime
 
 auth_router = APIRouter()
 user_collection = db["users"]
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = APIKeyHeader(name="Authorization")
 
 # -----------------------
 # Helper: Get user by email
@@ -27,13 +27,23 @@ def get_user_by_email(email: str):
 # Dependency: Get current user from token
 # -----------------------
 def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
+    print("🔐 Raw token received:", token)
+    
+    # REMOVE 'Bearer ' prefix if present
+    if token.startswith("Bearer "):
+        token = token.replace("Bearer ", "").strip()
+
     payload = decode_access_token(token)
+    print("📦 Decoded payload:", payload)
+
     if not payload or "sub" not in payload:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
-    email = payload["sub"]
-    user = get_user_by_email(email)
+
+    user = get_user_by_email(payload["sub"])
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
+
+    print("👤 Authenticated user:", user.email)
     return user
 
 # -----------------------

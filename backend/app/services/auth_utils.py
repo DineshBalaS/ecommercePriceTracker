@@ -16,6 +16,8 @@ SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
+print("🔑 JWT Config -> SECRET_KEY:", SECRET_KEY, "| ALGORITHM:", ALGORITHM)
+
 if not SECRET_KEY:
     raise ValueError("JWT_SECRET_KEY not set in environment variables.")
 

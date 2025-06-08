@@ -54,11 +54,11 @@ Develop a full-stack web application that monitors prices of products across var
 
 ## Phase 3: Core Backend Logic
 
-**Status:** Pending
+**Status:** ongoing
 
 ### Tasks
 
-* [ ] Build user model and auth system
+* [x] Build user model and auth system
 * [ ] Implement product tracking model
 * [ ] Develop scraping module for target websites
 * [ ] Schedule scraping jobs using Celery/APScheduler
@@ -97,7 +97,7 @@ Develop a full-stack web application that monitors prices of products across var
 * Include retry/failure handling in scraping logic
 * Ensure legal/ethical scraping by reviewing site ToS
 
-Project folder structure :- 
+planned Project folder structure :- 
 ecommerce-price-tracker/
 ├── backend/
 │   ├── app/
