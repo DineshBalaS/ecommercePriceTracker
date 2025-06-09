@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from backend.app.models.product import ProductCreate, ProductInDB, ProductOut, PyObjectId
 from backend.app.utils.mongo import mongo_safe_dict
 from backend.app.routes.auth import get_current_user
+from backend.app.utils.objectid import to_objectid
 from backend.app.models.user import UserInDB
 from backend.app.config import db
 from bson import ObjectId
@@ -26,7 +27,7 @@ def add_product(product: ProductCreate, current_user: UserInDB = Depends(get_cur
     print("📦 Cleaned product dict:", product_dict)
 
     inserted = product_collection.insert_one(product_dict)
-    product_dict["_id"] = inserted.inserted_id
+    product_dict["_id"] = str(inserted.inserted_id)
     product_dict["id"] = str(inserted.inserted_id)  # 👈 Fixes ValidationError
 
     return ProductOut(**product_dict)
@@ -45,17 +46,19 @@ def get_my_products(current_user: UserInDB = Depends(get_current_user)):
 @product_router.patch("/{id}", response_model=ProductOut)
 def update_product(id: str, update_data: dict, current_user: UserInDB = Depends(get_current_user)):
     try:
-        product_oid = ObjectId(id)
-        owner_oid = ObjectId(current_user.id)
-    except:
-        raise HTTPException(status_code=400, detail="Invalid ObjectId format")
+        obj_id = ObjectId(id)  # or use your custom to_objectid(id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid product ID format")
 
-    existing = product_collection.find_one({"_id": product_oid, "owner_id": owner_oid})
+    existing = product_collection.find_one({"_id": obj_id, "owner_id": str(current_user.id)})
+    print("🧩 obj_id used for update:", obj_id)
+
     if not existing:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    product_collection.update_one({"_id": product_oid}, {"$set": update_data})
-    updated = product_collection.find_one({"_id": product_oid})
+    product_collection.update_one({"_id": obj_id}, {"$set": update_data})
+    updated = product_collection.find_one({"_id": obj_id})
+    
     return ProductOut(**ProductInDB.model_validate(updated).dict())
 
 # ---------------------
@@ -64,12 +67,13 @@ def update_product(id: str, update_data: dict, current_user: UserInDB = Depends(
 @product_router.delete("/{id}")
 def delete_product(id: str, current_user: UserInDB = Depends(get_current_user)):
     try:
-        product_oid = ObjectId(id)
-        owner_oid = ObjectId(current_user.id)
-    except:
-        raise HTTPException(status_code=400, detail="Invalid ObjectId format")
+        obj_id = ObjectId(id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid product ID format")
 
-    result = product_collection.delete_one({"_id": product_oid, "owner_id": owner_oid})
+    result = product_collection.delete_one({"_id": obj_id, "owner_id": str(current_user.id)})
+    print("🧩 obj_id used for update:", obj_id)
+
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Product not found or not authorized")
     return {"detail": "Product deleted successfully"}

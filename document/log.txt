@@ -59,7 +59,7 @@ Develop a full-stack web application that monitors prices of products across var
 ### Tasks
 
 * [x] Build user model and auth system
-* [ ] Implement product tracking model
+* [x] Implement product tracking model
 * [ ] Develop scraping module for target websites
 * [ ] Schedule scraping jobs using Celery/APScheduler
 * [ ] Integrate email/notification system
