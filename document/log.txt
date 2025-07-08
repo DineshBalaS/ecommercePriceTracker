@@ -60,8 +60,8 @@ Develop a full-stack web application that monitors prices of products across var
 
 * [x] Build user model and auth system
 * [x] Implement product tracking model
-* [ ] Develop scraping module for target websites
-* [ ] Schedule scraping jobs using Celery/APScheduler
+* [x] Develop scraping module for target websites
+* [x] Schedule scraping jobs using Celery/APScheduler
 * [ ] Integrate email/notification system
 
 ---
@@ -124,3 +124,57 @@ ecommerce-price-tracker/
 ├── .env (for secrets)
 └── README.md
 
+current backend folder - > 
+
+C:\USERS\DINESH\DOCUMENTS\MP\PRICETRACKERAPP\BACKEND
+│   .env
+│   requirements.txt
+│   
+└───app
+    │   config.py
+    │   Dockerfile
+    │   main.py
+    │   __init__.py
+    │
+    ├───models
+    │   │   product.py
+    │   │   user.py
+    │   │
+    │   └───__pycache__
+    │           product.cpython-311.pyc
+    │           user.cpython-311.pyc
+    │
+    ├───routes
+    │   │   auth.py
+    │   │   product.py
+    │   │
+    │   └───__pycache__
+    │           auth.cpython-311.pyc
+    │           product.cpython-311.pyc
+    │
+    ├───services
+    │   │   auth_utils.py
+    │   │   flipkart_scraper.py
+    │   │   scraper.py
+    │   │   scraper_dispatcher.py
+    │   │   tracker.py
+    │   │
+    │   └───__pycache__
+    │           auth_utils.cpython-311.pyc
+    │           flipkart_scraper.cpython-311.pyc
+    │           scraper.cpython-311.pyc
+    │           scraper_dispatcher.cpython-311.pyc
+    │           tracker.cpython-311.pyc
+    │
+    ├───utils
+    │   │   mongo.py
+    │   │   objectid.py
+    │   │
+    │   └───__pycache__
+    │           mongo.cpython-311.pyc
+    │           objectid.cpython-311.pyc
+    │
+    └───__pycache__
+            config.cpython-311.pyc
+            main.cpython-311.pyc
+            __init__.cpython-311.pyc
