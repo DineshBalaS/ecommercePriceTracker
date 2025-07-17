@@ -1,0 +1,5 @@
+User: username, email, hashed_password, created_at, product_history, list_of_items_currently tracking
+
+Product: name, URL, site_name, current_price, desired_price, last_checked, owner_id (FK to User)
+
+Alert: product_id, price_at_alert, timestamp
