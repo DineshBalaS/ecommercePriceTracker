@@ -23,7 +23,8 @@ def scrape_amazon_product(url):
         response = requests.get(url, headers=HEADERS, timeout=10)
         response.raise_for_status()
     except requests.RequestException as e:
-        return f"Request failed: {e}"
+        print(f"[Amazon Scraper] Request failed: {e}")
+        return None
 
     soup = BeautifulSoup(response.text, 'html.parser')
 

@@ -1,7 +1,13 @@
 from fastapi import FastAPI
-from backend.app.config import db
+from fastapi.middleware.cors import CORSMiddleware
+from backend.app.config import db, MAIL_CONFIG
 from backend.app.routes.auth import auth_router
 from backend.app.routes.product import product_router
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from pydantic import EmailStr, BaseModel
+from typing import List
 import sys
 import os
 
@@ -16,6 +22,14 @@ from backend.app.services.tracker import run_price_tracker
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # frontend dev server
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 app.include_router(product_router, prefix="/products", tags=["Products"])
 
@@ -28,16 +42,42 @@ def test_db():
     collections = db.list_collection_names()
     return {"collections": collections}
 
-scheduler = AsyncIOScheduler()
-scheduler.add_job(
-    func=run_price_tracker,
-    trigger=IntervalTrigger(minutes=10),  # Change as needed
-    id='price_tracker_job',
-    name='Run price tracker every 10 minutes',
-    replace_existing=True
+conf = ConnectionConfig(
+    MAIL_USERNAME=MAIL_CONFIG["MAIL_USERNAME"],
+    MAIL_PASSWORD=MAIL_CONFIG["MAIL_PASSWORD"],
+    MAIL_FROM=MAIL_CONFIG["MAIL_FROM"],
+    MAIL_PORT=MAIL_CONFIG["MAIL_PORT"],
+    MAIL_SERVER=MAIL_CONFIG["MAIL_SERVER"],
+    MAIL_STARTTLS=MAIL_CONFIG["MAIL_STARTTLS"],
+    MAIL_SSL_TLS=MAIL_CONFIG["MAIL_SSL_TLS"],
+    USE_CREDENTIALS=True,
+    VALIDATE_CERTS=True
 )
-scheduler.start()
-print("📅 Scheduler started: running tracker every 10 minutes.")
 
-# Shutdown hook
-atexit.register(lambda: scheduler.shutdown())
+# Email Schema
+class EmailSchema(BaseModel):
+    email: List[EmailStr]
+
+@app.post("/send_mail")
+async def send_mail(email: EmailSchema):
+    template = """
+        <html>
+        <body>
+            <p>Hi !!!<br>
+            Thanks for using FastAPI Mail, keep using it..!!!</p>
+        </body>
+        </html>
+    """
+
+    message = MessageSchema(
+        subject="FastAPI-Mail module",
+        recipients=email.dict().get("email"),
+        body=template,
+        subtype="html"
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
+    print("Email sent:", message)
+
+    return JSONResponse(status_code=200, content={"message": "Email has been sent"})

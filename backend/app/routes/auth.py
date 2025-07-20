@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import EmailStr
+from pydantic import EmailStr, BaseModel, EmailStr
 from backend.app.models.user import UserCreate, UserInDB, UserOut
 from backend.app.services.auth_utils import (
     hash_password, verify_password, create_access_token, decode_access_token
@@ -13,6 +13,10 @@ auth_router = APIRouter()
 user_collection = db["users"]
 
 oauth2_scheme = APIKeyHeader(name="Authorization")
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
 
 # -----------------------
 # Helper: Get user by email
@@ -49,7 +53,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
 # -----------------------
 # POST /signup
 # -----------------------
-@auth_router.post("/signup", response_model=UserOut)
+@auth_router.post("/signup")
 def signup(user: UserCreate):
     existing = user_collection.find_one({"email": user.email})
     if existing:
@@ -62,24 +66,50 @@ def signup(user: UserCreate):
     user_dict["currently_tracking"] = []
     
     inserted = user_collection.insert_one(user_dict)
-    new_user = user_collection.find_one({"_id": inserted.inserted_id})
-    user_obj = UserInDB.model_validate(new_user)
-    return UserOut(**user_obj.model_dump())
+    new_user_db = user_collection.find_one({"_id": inserted.inserted_id})
+    # Create a token for the new user
+    access_token = create_access_token(data={"sub": new_user_db["email"]})
+
+    # Validate the user data for the response
+    user_obj = UserInDB.model_validate(new_user_db)
+    return {"access_token": access_token,
+        "token_type": "bearer",
+        "user": UserOut(**user_obj.model_dump()).model_dump()}
 
 
 # -----------------------
 # POST /login
 # -----------------------
+# @auth_router.post("/login")
+# def login(form_data: OAuth2PasswordRequestForm = Depends()):
+#     user = get_user_by_email(form_data.username)
+#     if not user or not verify_password(form_data.password, user.hashed_password):
+#         raise HTTPException(status_code=400, detail="Incorrect username or password")
+    
+#     access_token = create_access_token(data={"sub": user.email})
+#     return {
+#         "access_token": access_token,
+#         "token_type": "bearer"
+#     }
+
 @auth_router.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = get_user_by_email(form_data.username)
-    if not user or not verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+def login(request: LoginRequest): # 👈 Use the new LoginRequest model
+    user = get_user_by_email(request.email) # 👈 Use request.email
+    if not user or not verify_password(request.password, user.hashed_password):
+        # Use 401 for unauthorized access
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     
     access_token = create_access_token(data={"sub": user.email})
+    
+    # Return the token AND the user object, which the frontend needs
     return {
         "access_token": access_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "user": UserOut(**user.model_dump()).model_dump() # 👈 Add this user object
     }
     
 # -----------------------

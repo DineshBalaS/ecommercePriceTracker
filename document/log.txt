@@ -61,8 +61,8 @@ Develop a full-stack web application that monitors prices of products across var
 * [x] Build user model and auth system
 * [x] Implement product tracking model
 * [x] Develop scraping module for target websites
-* [x] Schedule scraping jobs using Celery/APScheduler
-* [ ] Integrate email/notification system
+* [x] Schedule scraping jobs using Celery/APScheduler (TBF)
+* [ ] Integrate email/notification system (TBF)
 
 ---
 
@@ -72,7 +72,7 @@ Develop a full-stack web application that monitors prices of products across var
 
 ### Tasks
 
-* [ ] Auth UI (login/signup)
+* [ ] Auth UI (login/signup) (yet to link them together)
 * [ ] Dashboard to view tracked products
 * [ ] Forms for adding/editing tracked products
 
@@ -178,3 +178,39 @@ C:\USERS\DINESH\DOCUMENTS\MP\PRICETRACKERAPP\BACKEND
             config.cpython-311.pyc
             main.cpython-311.pyc
             __init__.cpython-311.pyc
+
+this is my current frontend structure - > frontend has three main folders - > node modules, sources and public here is public
+
+```tree /f C:\Users\Dinesh\Documents\mp\priceTrackerApp\frontend\public
+Folder PATH listing for volume OS
+Volume serial number is 262A-D645
+C:\USERS\DINESH\DOCUMENTS\MP\PRICETRACKERAPP\FRONTEND\PUBLIC
+    favicon.ico
+    index.html
+    logo192.png
+    logo512.png
+    manifest.json
+    robots.txt
+
+No subfolders exist
+
+(venv) PS C:\Users\Dinesh\Documents\mp\priceTrackerApp>```
+
+and here is src - >
+
+``` tree /f C:\Users\Dinesh\Documents\mp\priceTrackerApp\frontend\src   
+Folder PATH listing for volume OS
+Volume serial number is 262A-D645
+C:\USERS\DINESH\DOCUMENTS\MP\PRICETRACKERAPP\FRONTEND\SRC
+    App.css
+    App.js
+    App.test.js
+    index.css
+    index.js
+    logo.svg
+    reportWebVitals.js
+    setupTests.js
+
+No subfolders exist
+
+(venv) PS C:\Users\Dinesh\Documents\mp\priceTrackerApp>```

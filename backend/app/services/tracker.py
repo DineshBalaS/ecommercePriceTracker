@@ -38,7 +38,7 @@ def update_price_for_product(product: dict):
             return
 
         # Parse numeric price from scraped dict
-        price_text = scraped.get("Price", "")
+        price_text = scraped.get("Price", "") if isinstance(scraped, dict) else ""
         price_num = (
             float("".join(c for c in price_text if c.isdigit() or c == "."))
             if price_text else 0.0
