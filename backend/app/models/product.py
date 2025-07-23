@@ -27,7 +27,7 @@ class PyObjectId(ObjectId):
 class ProductBase(BaseModel):
     name: str
     url: HttpUrl
-    site_name: str
+    site_name: str = "N/A"
     desired_price: float
     status: str = "tracking"  # options: tracking, bought, skipped, saved
     notes: Optional[str] = None
