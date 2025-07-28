@@ -94,9 +94,18 @@ def update_product(id: str, update_data: dict, current_user: UserInDB = Depends(
         raise HTTPException(status_code=404, detail="Product not found")
 
     product_collection.update_one({"_id": obj_id}, {"$set": update_data})
-    updated = product_collection.find_one({"_id": obj_id})
     
-    return format_product(updated)
+    if update_data.get("status") == "tracking":
+        print(f"📈 Status for {obj_id} changed to 'tracking'. Triggering price update...")
+        product_to_scrape = product_collection.find_one({"_id": obj_id})
+        
+        if product_to_scrape:
+            update_price_for_product(product_to_scrape)
+            print(f"✅ Scrape finished for {obj_id}.")
+    
+    final_product_doc = product_collection.find_one({"_id": obj_id})
+        
+    return format_product(final_product_doc)
 
 # ---------------------
 # DELETE /products/{id}
