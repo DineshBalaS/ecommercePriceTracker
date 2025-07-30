@@ -73,8 +73,12 @@ def add_product(product: ProductCreate, current_user: UserInDB = Depends(get_cur
 # GET /products/my
 # ---------------------
 @product_router.get("/my", response_model=list[ProductOut])
-def get_my_products(current_user: UserInDB = Depends(get_current_user)):
-    products = product_collection.find({"owner_id": ObjectId(current_user.id)})
+def get_my_products(status: str,current_user: UserInDB = Depends(get_current_user)):
+    query = {
+        "owner_id": ObjectId(current_user.id),
+        "status": status  # ✨ 3. Add the status to the query
+    }
+    products = product_collection.find(query)
     return [format_product(p) for p in products]
 
 # ---------------------
