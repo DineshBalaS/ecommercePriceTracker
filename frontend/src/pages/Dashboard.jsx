@@ -41,6 +41,7 @@ const Dashboard = () => {
 
   // --- State for UI ---
   const [showModal, setShowModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [fetchedTabs, setFetchedTabs] = useState({
     dashboard: false,
@@ -167,6 +168,30 @@ const Dashboard = () => {
     }
   };
 
+  const handleDeleteProduct = async () => {
+    if (!productToDelete) return; // Guard clause
+
+    try {
+      await api.delete(`/products/${productToDelete}`);
+
+      // Instant UI update: filter the product out of the state
+      setTrackedProducts((prevProducts) =>
+        prevProducts.filter((p) => p.id !== productToDelete)
+      );
+
+      // Close the confirmation modal
+      setProductToDelete(null);
+    } catch (err) {
+      console.error("Failed to delete product:", err);
+      alert(
+        err.response?.data?.detail ||
+          "Failed to delete product. Please try again."
+      );
+      // Also close the modal on error
+      setProductToDelete(null);
+    }
+  };
+
   const getStatusPill = (product) => {
     // This logic assumes your backend adds a `current_price` field after scraping
     const currentPrice = product.current_price || 0;
@@ -188,7 +213,7 @@ const Dashboard = () => {
       );
     }
     return (
-      <span className="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
+      <span className="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">
         Tracking
       </span>
     );
@@ -262,7 +287,15 @@ const Dashboard = () => {
                           >
                             Save for later?
                           </button>
-                          {/* You can add more options like "Delete" here in the future */}
+                          <button
+                            onClick={() => {
+                              setProductToDelete(product.id); // Set ID for modal
+                              setOpenMenuId(null); // Close the options menu
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                          >
+                            Delete Product
+                          </button>
                         </div>
                       </div>
                     )}
@@ -512,6 +545,36 @@ const Dashboard = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {productToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md mx-4">
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">
+              Confirm Deletion
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to permanently delete this product? This
+              action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                type="button"
+                onClick={() => setProductToDelete(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteProduct}
+                className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
