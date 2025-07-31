@@ -6,6 +6,7 @@ import { useAuth } from "../context/Authcontext";
 
 const Signup = () => {
   // --- STATE MANAGEMENT ---
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -16,7 +17,6 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent page reload
     setLocalError(""); // Reset local errors
-    
 
     // 1. Check if passwords match
     if (password !== confirmPassword) {
@@ -25,7 +25,7 @@ const Signup = () => {
     }
 
     // 2. Call the signup function from the context
-    await signup(email, password);
+    await signup(username, email, password);
   };
 
   return (
@@ -47,7 +47,20 @@ const Signup = () => {
           {/* 👇 Attach the submit handler to the form */}
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-sm font-medium mb-1">Email address</label>
+              <label className="block text-sm font-medium mb-1">Username</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                placeholder="Choose a unique username"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Email address
+              </label>
               <input
                 type="email"
                 value={email} // 👈 Bind value to state
@@ -69,7 +82,9 @@ const Signup = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Confirm Password</label>
+              <label className="block text-sm font-medium mb-1">
+                Confirm Password
+              </label>
               <input
                 type="password"
                 value={confirmPassword} // 👈 Bind value to state
@@ -86,10 +101,12 @@ const Signup = () => {
             >
               Sign up
             </button>
-            
+
             {/* 👇 Display errors from either client-side validation or the backend */}
             {(localError || authError) && (
-              <p className="text-red-500 text-sm text-center mt-2">{localError || authError}</p>
+              <p className="text-red-500 text-sm text-center mt-2">
+                {localError || authError}
+              </p>
             )}
 
             <button

@@ -69,10 +69,10 @@ export const AuthProvider = ({ children }) => {
   /**
    * Signs up a new user, saves the token, and navigates to the dashboard.
    */
-  const signup = async (email, password) => {
+  const signup = async (username, email, password) => {
     try {
       setLoading(true);
-      const res = await api.post("/auth/signup", { email, password });
+      const res = await api.post("/auth/signup", { username, email, password });
 
       const { access_token, user } = res.data;
 

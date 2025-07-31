@@ -59,6 +59,9 @@ def signup(user: UserCreate):
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
     
+    if user_collection.find_one({"username": user.username}):
+        raise HTTPException(status_code=400, detail="Username is already taken")
+    
     user_dict = user.dict()
     user_dict["hashed_password"] = hash_password(user_dict.pop("password"))
     user_dict["created_at"] = datetime.utcnow()

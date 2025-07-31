@@ -27,9 +27,11 @@ class PyObjectId(ObjectId):
 
 class UserBase(BaseModel):
     email: EmailStr
+    username: str
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=6)  # Plaintext password (to be hashed before storing)
+    username: str = Field(..., min_length=3, max_length=30, pattern="^[a-zA-Z0-9_]+$")
 
 class UserInDB(UserBase):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
