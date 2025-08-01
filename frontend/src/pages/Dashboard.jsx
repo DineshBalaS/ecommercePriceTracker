@@ -159,6 +159,32 @@ const Dashboard = () => {
     }
   };
 
+  const handleMarkAsPurchased = async (product) => {
+    try {
+      // 1. Optimistically find the product to move
+      const productToMove = trackedProducts.find((p) => p.id === product.id);
+      if (!productToMove) return;
+
+      // 2. Update the UI instantly for a snappy user experience
+      setTrackedProducts((prev) => prev.filter((p) => p.id !== product.id));
+      setPurchaseHistory((prev) => [
+        { ...productToMove, status: "purchased" },
+        ...prev,
+      ]);
+
+      // 3. Invalidate the history tab cache so it refetches next time
+      setFetchedTabs((prev) => ({ ...prev, history: false }));
+
+      // 4. Send the request to the backend to persist the change
+      await api.patch(`/products/${product.id}`, { status: "purchased" });
+    } catch (err) {
+      console.error("Failed to mark product as purchased:", err);
+      alert("Could not update the product. Please try again.");
+      // If the API call fails, revert the optimistic UI update to maintain consistency
+      setFetchedTabs({ dashboard: false, watchlist: false, history: false });
+    }
+  };
+
   const handleStartTracking = async (productId) => {
     setLoading(true);
     try {
@@ -344,7 +370,10 @@ const Dashboard = () => {
               <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
                 {getStatusPill(product)}
                 <div className="flex gap-2">
-                  <button className="text-xs text-gray-500 hover:text-purple-700 hover:underline">
+                  <button
+                    onClick={() => handleMarkAsPurchased(product)}
+                    className="text-xs text-gray-500 hover:text-purple-700 hover:underline"
+                  >
                     Mark as Purchased
                   </button>
                 </div>
