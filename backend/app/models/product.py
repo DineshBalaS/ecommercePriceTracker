@@ -31,6 +31,7 @@ class ProductBase(BaseModel):
     desired_price: float
     status: str = "tracking"  # options: tracking, bought, skipped, saved
     notes: Optional[str] = None
+    purchased_date: Optional[datetime] = None
 
 
 # For product creation
@@ -65,3 +66,4 @@ class ProductOut(ProductBase):
     current_price: Optional[float]
     created_at: datetime
     owner_id: str
+    purchased_date: Optional[datetime] = None

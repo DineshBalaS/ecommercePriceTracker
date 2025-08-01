@@ -96,6 +96,9 @@ def update_product(id: str, update_data: dict, current_user: UserInDB = Depends(
 
     if not existing:
         raise HTTPException(status_code=404, detail="Product not found")
+    
+    if update_data.get("status") == "purchased":
+        update_data["purchased_date"] = datetime.utcnow()
 
     product_collection.update_one({"_id": obj_id}, {"$set": update_data})
     
