@@ -20,6 +20,7 @@ const icons = {
     "M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375zM1.5 9.75v10.125c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875V9.75M8.25 12a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V12.75A.75.75 0 018.25 12zm3.75 0a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V12.75A.75.75 0 0112 12zm3.75 0a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V12.75A.75.75 0 0115.75 12z",
   watchlist:
     "M3 16.5v-11a2 2 0 012-2h14a2 2 0 012 2v11a2 2 0 01-2 2H5a2 2 0 01-2-2zm2.5-4a.5.5 0 000 1h9a.5.5 0 000-1h-9z",
+  user: "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z",
   logout:
     "M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m-3-3l3-3m0 0l-3-3m3 3H9",
   add: "M12 4.5c.414 0 .75.336.75.75v6h6a.75.75 0 010 1.5h-6v6a.75.75 0 01-1.5 0v-6h-6a.75.75 0 010-1.5h6v-6c0-.414.336-.75.75-.75z",
@@ -38,6 +39,7 @@ const Dashboard = () => {
   // --- State for API data ---
   const [trackedProducts, setTrackedProducts] = useState([]);
   const [watchlist, setWatchlist] = useState([]); // Assuming a future /watchlist endpoint
+  const [purchaseHistory, setPurchaseHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -45,24 +47,29 @@ const Dashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
+
   const [fetchedTabs, setFetchedTabs] = useState({
     dashboard: false,
     watchlist: false,
-  }); // ✨ NEW
+    history: false,
+  });
 
   const [openMenuId, setOpenMenuId] = useState(null);
   const menuRef = useRef(null);
+  const profileMenuRef = useRef(null);
 
   const handleApiError = () => {
     alert("An error occurred. Reloading data to ensure consistency.");
     // This reset allows the useEffect hooks to re-fetch data if needed.
-    setFetchedTabs({ dashboard: false, watchlist: false });
+    setFetchedTabs({ dashboard: false, watchlist: false, history: false });
   };
 
   // --- State for Modal Form ---
   const [newProductName, setNewProductName] = useState("");
   const [newProductUrl, setNewProductUrl] = useState("");
   const [newProductPrice, setNewProductPrice] = useState("");
+
   useEffect(() => {
     // We only proceed if a user is logged in.
     if (user && !fetchedTabs[activeTab]) {
@@ -77,6 +84,10 @@ const Dashboard = () => {
           } else if (activeTab === "watchlist") {
             const response = await api.get("/products/my?status=saved");
             setWatchlist(response.data);
+          } else if (activeTab === "history") {
+            // ✨ NEW
+            const response = await api.get("/products/my?status=purchased");
+            setPurchaseHistory(response.data);
           }
           // Mark this tab as fetched to prevent re-fetching.
           setFetchedTabs((prev) => ({ ...prev, [activeTab]: true }));
@@ -98,6 +109,12 @@ const Dashboard = () => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setOpenMenuId(null); // Close the menu if click is outside
+      }
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target)
+      ) {
+        setProfileMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -147,7 +164,7 @@ const Dashboard = () => {
       await api.patch(`/products/${productId}`, { status: "tracking" });
 
       // ✨ 2. Invalidate both lists to trigger a refetch from the server
-      setFetchedTabs({ dashboard: false, watchlist: false });
+      setFetchedTabs({ dashboard: false, watchlist: false, history: false });
     } catch (err) {
       console.error("Failed to start tracking product:", err);
       alert("Could not start tracking the product. Please try again.");
@@ -162,7 +179,7 @@ const Dashboard = () => {
     try {
       // Make the API call to update the backend
       await api.patch(`/products/${productId}`, { status: "saved" });
-      setFetchedTabs({ dashboard: false, watchlist: false });
+      setFetchedTabs({ dashboard: false, watchlist: false, history: false });
     } catch (err) {
       console.error("Failed to save product for later:", err);
       alert("Could not save product. Please try again.");
@@ -178,6 +195,9 @@ const Dashboard = () => {
 
       // Instant UI update: filter the product out of the state
       setTrackedProducts((prev) =>
+        prev.filter((p) => p.id !== productToDelete)
+      );
+      setPurchaseHistory((prev) =>
         prev.filter((p) => p.id !== productToDelete)
       );
       setWatchlist((prev) => prev.filter((p) => p.id !== productToDelete));
@@ -395,6 +415,64 @@ const Dashboard = () => {
         </div>
       );
     }
+    if (activeTab === "history") {
+      if (purchaseHistory.length === 0) {
+        return (
+          <div className="text-center text-gray-500">
+            <p>You have no purchase history yet.</p>
+            <p className="text-sm mt-1">
+              Mark a product as purchased to see it here.
+            </p>
+          </div>
+        );
+      }
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {purchaseHistory.map((product) => (
+            <div
+              key={product.id}
+              className="bg-white rounded-lg shadow p-4 flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-start gap-4">
+                  <img
+                    src={
+                      product.image_url ||
+                      "https://placehold.co/100x100/EBF4FF/1E40AF?text=Bought"
+                    }
+                    alt={product.name}
+                    className="w-20 h-20 object-cover rounded-md flex-shrink-0"
+                  />
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-800 leading-tight">
+                      {product.name}
+                    </p>
+                    <p className="text-sm text-gray-500">{product.store}</p>
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-between items-baseline">
+                  <div>
+                    <p className="text-sm text-gray-500">Purchased at</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      ₹{(product.current_price || 0).toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-500">Date</p>
+                    <p className="text-base font-semibold text-gray-600">
+                      {new Date(product.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                {getStatusPill(product)}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
   };
 
   return (
@@ -428,13 +506,44 @@ const Dashboard = () => {
             <span className="ml-3">Saved for Later</span>
           </a>
         </nav>
-        <div className="px-4 py-4 border-t border-gray-200">
+        <div
+          className="relative px-4 py-4 border-t border-gray-200"
+          ref={profileMenuRef}
+        >
+          {isProfileMenuOpen && (
+            <div className="absolute left-4 right-4 bottom-full mb-2 w-auto bg-white rounded-md shadow-lg z-20 border border-gray-100">
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    setActiveTab("history");
+                    setProfileMenuOpen(false);
+                  }}
+                  className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-100 hover:text-purple-700"
+                >
+                  <Icon path={icons.watchlist} className="w-5 h-5 mr-3" />
+                  Purchase History
+                </button>
+                <button
+                  onClick={() => {
+                    logout();
+                    setProfileMenuOpen(false);
+                  }}
+                  className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  <Icon path={icons.logout} className="w-5 h-5 mr-3" />
+                  Logout
+                </button>
+              </div>
+            </div>
+          )}
           <button
-            onClick={logout}
-            className="flex items-center w-full px-4 py-2 text-gray-700 rounded-lg hover:bg-red-100 hover:text-red-700 transition-colors"
+            onClick={() => setProfileMenuOpen((prev) => !prev)}
+            className="flex items-center w-full px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            <Icon path={icons.logout} />
-            <span className="ml-3">Logout</span>
+            <Icon path={icons.user} className="w-6 h-6 text-gray-500" />
+            <span className="ml-3 font-semibold truncate">
+              {user?.username || "My Account"}
+            </span>
           </button>
         </div>
       </aside>
@@ -474,7 +583,9 @@ const Dashboard = () => {
         <h3 className="text-xl font-semibold text-gray-700 mb-4">
           {activeTab === "dashboard"
             ? `My Watchlist (${trackedProducts.length})`
-            : "Saved for Later"}
+            : activeTab === "watchlist"
+            ? `Saved for Later (${watchlist.length})`
+            : `Purchase History (${purchaseHistory.length})`}
         </h3>
         {renderContent()}
       </main>
