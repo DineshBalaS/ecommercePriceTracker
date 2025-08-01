@@ -489,9 +489,9 @@ const Dashboard = () => {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-500">Date</p>
+                    <p className="text-sm text-gray-500">Purchased on</p>
                     <p className="text-base font-semibold text-gray-600">
-                      {new Date(product.created_at).toLocaleDateString()}
+                      {new Date(product.purchased_date || product.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
