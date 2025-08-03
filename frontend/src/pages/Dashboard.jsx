@@ -480,6 +480,13 @@ const Dashboard = () => {
                     </p>
                     <p className="text-sm text-gray-500">{product.store}</p>
                   </div>
+                  <button
+                    onClick={() => setProductToDelete(product.id)}
+                    title="Delete Product"
+                    className="flex-shrink-0 p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-full transition"
+                  >
+                    <Icon path={icons.trash} className="w-5 h-5" />
+                  </button>
                 </div>
                 <div className="mt-4 flex justify-between items-baseline">
                   <div>
@@ -491,7 +498,9 @@ const Dashboard = () => {
                   <div className="text-right">
                     <p className="text-sm text-gray-500">Purchased on</p>
                     <p className="text-base font-semibold text-gray-600">
-                      {new Date(product.purchased_date || product.created_at).toLocaleDateString()}
+                      {new Date(
+                        product.purchased_date || product.created_at
+                      ).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -705,11 +714,16 @@ const Dashboard = () => {
         <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md mx-4">
             <h3 className="text-2xl font-bold text-gray-800 mb-2">
-              Confirm Deletion
+              {/* ✨ NEW - Conditional title */}
+              {purchaseHistory.find((p) => p.id === productToDelete)
+                ? "Remove from History?"
+                : "Confirm Deletion"}
             </h3>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to permanently delete this product? This
-              action cannot be undone.
+              {/* ✨ NEW - Conditional message */}
+              {purchaseHistory.find((p) => p.id === productToDelete)
+                ? "Are you sure you want to permanently remove this item from your purchase history? This action cannot be undone."
+                : "Are you sure you want to permanently delete this product? This action cannot be undone."}
             </p>
             <div className="flex justify-end gap-4">
               <button
