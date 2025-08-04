@@ -50,6 +50,8 @@ const Dashboard = () => {
   const [productToDelete, setProductToDelete] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
 
   const [fetchedTabs, setFetchedTabs] = useState({
     dashboard: false,
@@ -106,6 +108,15 @@ const Dashboard = () => {
     // The dependencies are simplified. The hook only needs to re-run when the
     // user logs in OR when the active tab changes.
   }, [user, activeTab, fetchedTabs]); // Re-run effect if the user object changes
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 250);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -270,6 +281,20 @@ const Dashboard = () => {
     );
   };
 
+  const getFilteredList = (list) => {
+    const trimmedQuery = debouncedQuery.trim().toLowerCase();
+    if (!trimmedQuery) {
+      return list;
+    }
+    return list.filter((product) =>
+      product.name.toLowerCase().includes(trimmedQuery)
+    );
+  };
+
+  const filteredTrackedProducts = getFilteredList(trackedProducts);
+  const filteredWatchlist = getFilteredList(watchlist);
+  const filteredPurchaseHistory = getFilteredList(purchaseHistory);
+
   const renderContent = () => {
     if (loading) {
       return (
@@ -282,7 +307,15 @@ const Dashboard = () => {
       return <div className="text-center text-red-500">{error}</div>;
     }
     if (activeTab === "dashboard") {
-      if (trackedProducts.length === 0) {
+      if (filteredTrackedProducts.length === 0) {
+        if (debouncedQuery.trim()) {
+          return (
+            <div className="text-center text-gray-500">
+              No products found. Please check your spelling or try a different
+              search term.
+            </div>
+          );
+        }
         return (
           <div className="text-center text-gray-500">
             You are not tracking any products yet. Click "Track New Product" to
@@ -292,7 +325,7 @@ const Dashboard = () => {
       }
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
-          {trackedProducts.map((product) => (
+          {filteredTrackedProducts.map((product) => (
             <div
               key={product.id}
               className="bg-white rounded-lg shadow p-4 flex flex-col justify-between transition hover:shadow-lg"
@@ -385,7 +418,15 @@ const Dashboard = () => {
     }
     // Placeholder for Watchlist
     if (activeTab === "watchlist") {
-      if (watchlist.length === 0) {
+      if (filteredWatchlist.length === 0) {
+        if (debouncedQuery.trim()) {
+          return (
+            <div className="text-center text-gray-500">
+              {" "}
+              No products found...{" "}
+            </div>
+          );
+        }
         return (
           <div className="text-center text-gray-500">
             <p>You haven't saved any products for later yet.</p>
@@ -399,7 +440,7 @@ const Dashboard = () => {
       return (
         // --- NEW CODE: This now maps over the live 'watchlist' state ---
         <div className="grid grid-cols-1 md-grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
-          {watchlist.map((product) => (
+          {filteredWatchlist.map((product) => (
             <div
               key={product.id}
               className="bg-white rounded-lg shadow p-4 flex flex-col justify-between transition hover:shadow-lg"
@@ -605,9 +646,27 @@ const Dashboard = () => {
               />
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search products..."
                 className="pl-10 pr-4 py-2 border rounded-lg w-64 focus:ring-2 focus:ring-purple-600 focus:outline-none"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label="Clear search"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="w-5 h-5"
+                  >
+                    <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                  </svg>
+                </button>
+              )}
             </div>
             <button
               onClick={() => setShowModal(true)}
@@ -622,10 +681,10 @@ const Dashboard = () => {
         {/* Content Area */}
         <h3 className="text-xl font-semibold text-gray-700 mb-4">
           {activeTab === "dashboard"
-            ? `My Watchlist (${trackedProducts.length})`
+            ? `My Watchlist (${filteredTrackedProducts.length})`
             : activeTab === "watchlist"
-            ? `Saved for Later (${watchlist.length})`
-            : `Purchase History (${purchaseHistory.length})`}
+            ? `Saved for Later (${filteredWatchlist.length})`
+            : `Purchase History (${filteredPurchaseHistory.length})`}
         </h3>
         {renderContent()}
       </main>
