@@ -281,6 +281,15 @@ const Dashboard = () => {
     );
   };
 
+  const getStoreDisplayName = (product) => {
+    // Check if site_name is valid and not the placeholder "N/A"
+    if (product.site_name && product.site_name !== "N/A") {
+      return product.site_name;
+    }
+    // Fallback to "Store" if site_name is missing or a placeholder
+    return "Store";
+  };
+
   const getFilteredList = (list) => {
     const trimmedQuery = debouncedQuery.trim().toLowerCase();
     if (!trimmedQuery) {
@@ -345,7 +354,7 @@ const Dashboard = () => {
                       {product.name || "Product Name"}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {product.store || "Store"}
+                      {getStoreDisplayName(product)}
                     </p>
                   </div>
                   <div
@@ -458,7 +467,9 @@ const Dashboard = () => {
                   <p className="font-semibold text-gray-800 leading-tight">
                     {product.name}
                   </p>
-                  <p className="text-sm text-gray-500">{product.site_name}</p>
+                  <p className="text-sm text-gray-500">
+                    {getStoreDisplayName(product)}
+                  </p>
                   <p className="text-sm text-gray-500 mt-2">
                     Current Price:{" "}
                     <span className="font-medium text-gray-600">
@@ -519,7 +530,9 @@ const Dashboard = () => {
                     <p className="font-semibold text-gray-800 leading-tight">
                       {product.name}
                     </p>
-                    <p className="text-sm text-gray-500">{product.store}</p>
+                    <p className="text-sm text-gray-500">
+                      {getStoreDisplayName(product)}
+                    </p>
                   </div>
                   <button
                     onClick={() => setProductToDelete(product.id)}
