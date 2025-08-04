@@ -291,7 +291,7 @@ const Dashboard = () => {
         );
       }
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
           {trackedProducts.map((product) => (
             <div
               key={product.id}
@@ -398,7 +398,7 @@ const Dashboard = () => {
       }
       return (
         // --- NEW CODE: This now maps over the live 'watchlist' state ---
-        <div className="grid grid-cols-1 md-grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md-grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
           {watchlist.map((product) => (
             <div
               key={product.id}
@@ -458,7 +458,7 @@ const Dashboard = () => {
         );
       }
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
           {purchaseHistory.map((product) => (
             <div
               key={product.id}
