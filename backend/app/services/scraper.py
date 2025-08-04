@@ -33,7 +33,8 @@ def scrape_amazon_product(url):
         "Price": get_text(soup, 'span', {"class": "a-price-whole"}),
         "Rating": get_text(soup, 'span', {"class": "a-size-base a-color-base", "aria-hidden": "true"}),
         "Seller": get_text(soup, 'a', {"id": "sellerProfileTriggerId"}),
-        "Description": get_description(soup)
+        "Description": get_description(soup),
+        "SiteName": "Amazon"
     }
 
     return data

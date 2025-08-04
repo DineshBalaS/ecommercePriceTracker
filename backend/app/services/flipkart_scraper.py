@@ -51,7 +51,8 @@ def extract_product_data(html: str) -> dict:
         "Price": price,
         "Rating": rating,
         "Seller": seller_name,
-        "Description": desc
+        "Description": desc,
+        "SiteName": "Flipkart"
     }
 
 

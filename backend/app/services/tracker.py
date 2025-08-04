@@ -43,10 +43,18 @@ def update_price_for_product(product: dict):
             float("".join(c for c in price_text if c.isdigit() or c == "."))
             if price_text else 0.0
         )
+        
+        update_payload = {
+            "current_price": price_num
+        }
+        
+        scraped_site_name = scraped.get("SiteName")
+        if scraped_site_name:
+            update_payload["site_name"] = scraped_site_name
 
         result = product_collection.update_one(
             {"_id": ObjectId(product_id)},
-            {"$set": {"current_price": price_num}}
+            {"$set": update_payload}
         )
 
         if result.modified_count == 1:
