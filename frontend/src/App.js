@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 import { AuthProvider } from "./context/Authcontext";
 import Login from "./components/Login";
@@ -7,10 +12,16 @@ import Signup from "./components/Signup";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+import ProductDetailPage from "./pages/ProductDetailPage";
+
 function App() {
   return (
-    <Router> {/* 🔁 Router first */}
-      <AuthProvider> {/* ✅ Now inside router context */}
+    <Router>
+      {" "}
+      {/* 🔁 Router first */}
+      <AuthProvider>
+        {" "}
+        {/* ✅ Now inside router context */}
         <Routes>
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
@@ -20,6 +31,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/product/:id"
+            element={
+              <ProtectedRoute>
+                <ProductDetailPage />
               </ProtectedRoute>
             }
           />

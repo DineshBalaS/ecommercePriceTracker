@@ -37,4 +37,14 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+export const getProductById = async (productId) => {
+  const response = await api.get(`/products/${productId}`);
+  return response.data;
+};
+
+export const updateProductDetails = async (productId, data) => {
+  const response = await api.patch(`/products/${productId}`, data);
+  return response.data;
+};
+
 export default api;

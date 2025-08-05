@@ -288,11 +288,99 @@ AC-4: [API Enhancement] Enhance PATCH /api/products/{id}
 File: app/routes/product.py and app/models/product.py
 Status: Pending
 
-[ ] 4.1: Create `ProductUpdate` Model
+[x] 4.1: Create `ProductUpdate` Model
     - In `app/models/product.py`, create a new model: `class ProductUpdate(BaseModel): desired_price: Optional[float] = None; notes: Optional[str] = None`.
 
-[ ] 4.2: Update Endpoint Signature
+[x] 4.2: Update Endpoint Signature
     - In `app/routes/product.py`, change the signature of the `update_product` function from `update_data: dict` to `update_data: ProductUpdate`.
 
-[ ] 4.3: Refine Update Logic
+[x] 4.3: Refine Update Logic
     - Replace the generic `update_data` dictionary with `update_data.model_dump(exclude_unset=True)` to build the `$set` payload cleanly and safely.
+
+
+==================================================
+Frontend Plan: Product Detail Page (Phase 2)
+==================================================
+
+This plan outlines the steps to create the new Product Detail page, leveraging the existing architecture and patterns.
+
+--------------------------------------------------
+Part 1: API and Routing Setup (AC-5)
+--------------------------------------------------
+Objective: Prepare the API layer for new requests and set up the new page route.
+
+[X] 1.1: Enhance API Layer
+    - File: src/api/api.js
+    - Action: Add two new exported functions:
+        - `getProductById(productId)`: Performs a GET request to `/api/products/${productId}`.
+        - `updateProductDetails(productId, data)`: Performs a PATCH request to `/api/products/${productId}` with the provided data payload.
+
+[x] 1.2: Add New Page Route
+    - File: src/App.js
+    - Action:
+        - Import the new `ProductDetailPage` component (which we will create).
+        - Add a new `<Route>` inside `<Routes>`:
+          <Route path="/product/:id" element={<ProtectedRoute><ProductDetailPage /></ProtectedRoute>} />
+
+[x] 1.3: Make Dashboard Products Clickable
+    - File: src/pages/Dashboard.jsx
+    - Action:
+        - Import { Link } from "react-router-dom".
+        - In the `.map()` function that renders product cards, wrap the main `div` of the card with a `<Link>` component.
+        - The link's destination should be `to={'/product/${product.id}'}`.
+
+--------------------------------------------------
+Part 2: Build ProductDetailPage Component (AC-6, AC-10)
+--------------------------------------------------
+Objective: Create the main page component, fetch data, and handle loading/error states.
+
+[x] 2.1: Create New Component File
+    - New File: src/pages/ProductDetailPage.jsx
+
+[x] 2.2: Set Up Component State
+    - Action: Inside the `ProductDetailPage` component:
+        - Get the product ID from the URL using the `useParams` hook.
+        - Initialize state variables using `useState`:
+            - `product` (default: null)
+            - `isLoading` (default: true)
+            - `error` (default: null)
+
+[x] 2.3: Fetch Product Data
+    - Action: Use a `useEffect` hook to fetch data when the component loads.
+        - Call the `getProductById(id)` function from `api.js`.
+        - On success, update the `product` state.
+        - On failure, update the `error` state.
+        - Use a `finally` block to set `isLoading` to `false`.
+
+[x] 2.4: Implement Conditional Rendering
+    - Action: In the JSX, render content based on the state:
+        - If `isLoading`, show a loading message/spinner.
+        - If `error`, show an error message.
+        - If `product` is loaded, render the page content.
+
+--------------------------------------------------
+Part 3: Implement UI Panels (AC-7, AC-8, AC-9)
+--------------------------------------------------
+Objective: Build the three main UI sections of the page within ProductDetailPage.jsx.
+
+[x] 3.1: Build Vitals Panel (AC-7)
+    - Action: Create a section to display the key price points.
+        - Render `product.current_price`, `product.desired_price`, `product.historical_low_price`, and `product.historical_high_price`.
+        - Add a small up/down arrow icon next to the current price by comparing the last two entries in `product.price_history`.
+
+[x] 3.2: Build Price History Chart (AC-8)
+    - Action:
+        - Install a charting library: `npm install recharts`.
+        - Create state for the active time range filter: `const [timeRange, setTimeRange] = useState('All');`
+        - Create buttons (1W, 1M, 6M, All) that update this `timeRange` state.
+        - Write a helper function to filter `product.price_history` based on the selected `timeRange`.
+        - Render the Recharts `<LineChart>` component with the filtered data.
+        - Configure the `<Tooltip>` to show price and formatted date on hover. (Recommended: `npm install date-fns`).
+
+[x] 3.3: Build User Settings Panel (AC-9)
+    - Action:
+        - Create a `<form>` element for user settings.
+        - Use controlled components for the `desired_price` input and `notes` textarea. This will require new state variables.
+        - Use a `useEffect` to populate these form fields with `product.desired_price` and `product.notes` once the product data is loaded.
+        - The "Save" button's `onClick` handler will call the `updateProductDetails()` API function with the new form values.
+        - Add state to handle the saving process (e.g., a "Saving..." message on the button).

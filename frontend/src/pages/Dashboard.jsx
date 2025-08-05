@@ -1,5 +1,6 @@
 // src/pages/Dashboard.jsx
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/Authcontext";
 import api from "../api/api"; // Import the pre-configured axios instance
 
@@ -335,92 +336,107 @@ const Dashboard = () => {
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
           {filteredTrackedProducts.map((product) => (
-            <div
-              key={product.id}
-              className="bg-white rounded-lg shadow p-4 flex flex-col justify-between transition hover:shadow-lg"
-            >
-              <div>
-                <div className="flex items-start gap-4">
-                  <img
-                    src={
-                      product.image_url ||
-                      "https://placehold.co/100x100/F3E8FF/4C1D95?text=Image"
-                    }
-                    alt={product.name}
-                    className="w-20 h-20 object-cover rounded-md flex-shrink-0"
-                  />
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-800 leading-tight">
-                      {product.name || "Product Name"}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {getStoreDisplayName(product)}
-                    </p>
-                  </div>
-                  <div
-                    className="relative"
-                    ref={openMenuId === product.id ? menuRef : null}
-                  >
-                    <button
-                      onClick={() =>
-                        setOpenMenuId(
-                          openMenuId === product.id ? null : product.id
-                        )
+            // MODIFIED -> Wrap the card div with a Link component
+            <Link key={product.id} to={`/product/${product.id}`} className="block">
+              <div
+                className="bg-white rounded-lg shadow p-4 flex flex-col justify-between transition hover:shadow-lg h-full"
+              >
+                <div>
+                  <div className="flex items-start gap-4">
+                    <img
+                      src={
+                        product.image_url ||
+                        "https://placehold.co/100x100/F3E8FF/4C1D95?text=Image"
                       }
-                      className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+                      alt={product.name}
+                      className="w-20 h-20 object-cover rounded-md flex-shrink-0"
+                    />
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-800 leading-tight">
+                        {product.name || "Product Name"}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {getStoreDisplayName(product)}
+                      </p>
+                    </div>
+                    <div
+                      className="relative"
+                      ref={openMenuId === product.id ? menuRef : null}
                     >
-                      <Icon path={icons.options} className="w-5 h-5" />
-                    </button>
-                    {openMenuId === product.id && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-100">
-                        <div className="py-1">
-                          <button
-                            onClick={() => handleSaveForLater(product.id)}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            Save for later?
-                          </button>
-                          <button
-                            onClick={() => {
-                              setProductToDelete(product.id); // Set ID for modal
-                              setOpenMenuId(null); // Close the options menu
-                            }}
-                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                          >
-                            Delete Product
-                          </button>
+                      <button
+                        onClick={(e) => {
+                          // NEW -> Prevent link navigation when clicking the menu
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setOpenMenuId(
+                            openMenuId === product.id ? null : product.id
+                          );
+                        }}
+                        className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+                      >
+                        <Icon path={icons.options} className="w-5 h-5" />
+                      </button>
+                      {openMenuId === product.id && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-100">
+                          <div className="py-1">
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleSaveForLater(product.id)
+                              }}
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              Save for later?
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setProductToDelete(product.id);
+                                setOpenMenuId(null);
+                              }}
+                              className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                            >
+                              Delete Product
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-4 flex justify-between items-baseline">
+                    <div>
+                      <p className="text-sm text-gray-500">Current Price</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        ₹{(product.current_price || 0).toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-500">Desired</p>
+                      <p className="text-lg font-semibold text-gray-600">
+                        ₹{(product.desired_price || 0).toFixed(2)}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="mt-4 flex justify-between items-baseline">
-                  <div>
-                    <p className="text-sm text-gray-500">Current Price</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      ₹{(product.current_price || 0).toFixed(2)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500">Desired</p>
-                    <p className="text-lg font-semibold text-gray-600">
-                      ₹{(product.desired_price || 0).toFixed(2)}
-                    </p>
+                <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                  {getStatusPill(product)}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleMarkAsPurchased(product)
+                      }}
+                      className="text-xs text-gray-500 hover:text-purple-700 hover:underline"
+                    >
+                      Mark as Purchased
+                    </button>
                   </div>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
-                {getStatusPill(product)}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleMarkAsPurchased(product)}
-                    className="text-xs text-gray-500 hover:text-purple-700 hover:underline"
-                  >
-                    Mark as Purchased
-                  </button>
-                </div>
-              </div>
-            </div>
+            </Link>
           ))}
         </div>
       );
@@ -447,7 +463,6 @@ const Dashboard = () => {
         );
       }
       return (
-        // --- NEW CODE: This now maps over the live 'watchlist' state ---
         <div className="grid grid-cols-1 md-grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
           {filteredWatchlist.map((product) => (
             <div
