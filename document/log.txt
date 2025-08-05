@@ -214,3 +214,85 @@ C:\USERS\DINESH\DOCUMENTS\MP\PRICETRACKERAPP\FRONTEND\SRC
 No subfolders exist
 
 (venv) PS C:\Users\Dinesh\Documents\mp\priceTrackerApp>```
+
+
+next plan for product page - > 
+
+Implementation Plan for Product Detail Page - Backend (Phase 1)
+Last Updated: 2025-08-05
+
+==================================================
+AC-1: [DB Schema] Update Product Model
+==================================================
+File: app/models/product.py
+Status: Pending
+
+[ ] 1.1: Create `PriceHistoryItem` Model
+    - Define a new `BaseModel` called `PriceHistoryItem`.
+    - It will contain `price: Optional[float]` (to handle failed scrapes) and `timestamp: datetime`.
+
+[ ] 1.2: Update `ProductInDB` Model
+    - Add the new fields to the `ProductInDB` class:
+        - `price_history: List[PriceHistoryItem] = []`
+        - `historical_low_price: Optional[float] = None`
+        - `historical_high_price: Optional[float] = None`
+
+[ ] 1.3: Update `ProductOut` Model
+    - Mirror the changes from `ProductInDB` in the `ProductOut` class so the new data is sent to the frontend.
+
+==================================================
+AC-2: [Tracker Logic] Modify Tracker Script
+==================================================
+File: app/services/tracker.py (function: update_price_for_product)
+Status: Pending
+
+[ ] 2.1: Adjust Price Parsing
+    - Modify logic to set `price_num` to `None` if scraping fails or returns no price, instead of the current `0.0`.
+
+[ ] 2.2: Build Dynamic Update Payload
+    - Construct a complex payload that ALWAYS uses `$push` to add a new `PriceHistoryItem` to the `price_history` array (with either the scraped price or `None`).
+
+[ ] 2.3: Implement Conditional `$set`
+    - Add logic to build the `$set` object ONLY if `price_num` is not `None`:
+      a) Set the `current_price`.
+      b) Compare `price_num` with `product.get("historical_low_price")`. If it's a new low (or the first price), add `historical_low_price` to the `$set` object.
+      c) Do the same for `historical_high_price`.
+
+[ ] 2.4: Execute Combined Update
+    - Use the new payload in the `product_collection.update_one()` call, combining `$push` and `$set` operations into a single database write.
+
+==================================================
+AC-3: [New API Endpoint] Create GET /api/products/{id}
+==================================================
+File: app/routes/product.py
+Status: Pending
+
+[ ] 3.1: Define New Route
+    - Create a new endpoint: `@product_router.get("/{id}", response_model=ProductOut)`.
+
+[ ] 3.2: Add Authorization
+    - Ensure the route uses the `current_user: UserInDB = Depends(get_current_user)` dependency.
+
+[ ] 3.3: Fetch Product with Ownership Check
+    - Find the product where `_id` matches the path `id` AND `owner_id` matches `current_user.id`.
+
+[ ] 3.4: Handle Not Found
+    - If no product is found, raise a `404 Not Found` HTTPException.
+
+[ ] 3.5: Return Product
+    - If found, use the existing `format_product()` helper function to prepare and return the data.
+
+==================================================
+AC-4: [API Enhancement] Enhance PATCH /api/products/{id}
+==================================================
+File: app/routes/product.py and app/models/product.py
+Status: Pending
+
+[ ] 4.1: Create `ProductUpdate` Model
+    - In `app/models/product.py`, create a new model: `class ProductUpdate(BaseModel): desired_price: Optional[float] = None; notes: Optional[str] = None`.
+
+[ ] 4.2: Update Endpoint Signature
+    - In `app/routes/product.py`, change the signature of the `update_product` function from `update_data: dict` to `update_data: ProductUpdate`.
+
+[ ] 4.3: Refine Update Logic
+    - Replace the generic `update_data` dictionary with `update_data.model_dump(exclude_unset=True)` to build the `$set` payload cleanly and safely.

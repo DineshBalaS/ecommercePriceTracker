@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, HttpUrl, GetCoreSchemaHandler
 from pydantic_core import core_schema
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from bson import ObjectId
 
@@ -21,6 +21,10 @@ class PyObjectId(ObjectId):
         if not ObjectId.is_valid(v):
             raise ValueError("Invalid ObjectId")
         return str(ObjectId(v))
+    
+class PriceHistoryItem(BaseModel):
+    price: Optional[float]  # Price is Optional to allow logging failed scrapes as `null`
+    timestamp: datetime
 
 
 # Common base
