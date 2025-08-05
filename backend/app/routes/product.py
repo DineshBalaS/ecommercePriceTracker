@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from backend.app.models.product import ProductCreate, ProductInDB, ProductOut, PyObjectId
+from backend.app.models.product import ProductCreate, ProductInDB, ProductOut, PyObjectId, ProductUpdate
 from backend.app.utils.mongo import mongo_safe_dict
 from backend.app.routes.auth import get_current_user
 from backend.app.utils.objectid import to_objectid
@@ -82,10 +82,31 @@ def get_my_products(status: str,current_user: UserInDB = Depends(get_current_use
     return [format_product(p) for p in products]
 
 # ---------------------
+# GET /products/{id}
+# ---------------------
+@product_router.get("/{id}", response_model=ProductOut)
+def get_product_by_id(id: str, current_user: UserInDB = Depends(get_current_user)):
+    try:
+        obj_id = ObjectId(id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid product ID format")
+
+    # Perform a secure query that checks for both product ID and ownership
+    product_doc = product_collection.find_one(
+        {"_id": obj_id, "owner_id": ObjectId(current_user.id)}
+    )
+
+    if not product_doc:
+        raise HTTPException(status_code=404, detail="Product not found or not authorized")
+
+    # Use the existing helper to format the document for the response
+    return format_product(product_doc)
+
+# ---------------------
 # PATCH /products/{id}
 # ---------------------
 @product_router.patch("/{id}", response_model=ProductOut)
-def update_product(id: str, update_data: dict, current_user: UserInDB = Depends(get_current_user)):
+def update_product(id: str, update_data: ProductUpdate, current_user: UserInDB = Depends(get_current_user)):
     try:
         obj_id = ObjectId(id)  # or use your custom to_objectid(id)
     except Exception:
@@ -97,15 +118,19 @@ def update_product(id: str, update_data: dict, current_user: UserInDB = Depends(
     if not existing:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    if update_data.get("status") == "purchased":
-        update_data["purchased_date"] = datetime.utcnow()
-
-    product_collection.update_one({"_id": obj_id}, {"$set": update_data})
+    update_payload = update_data.model_dump(exclude_unset=True)
     
-    if update_data.get("status") == "tracking":
+    if not update_payload:
+        return format_product(existing)
+    
+    if update_data.status == "purchased":
+        update_payload["purchased_date"] = datetime.utcnow()
+
+    product_collection.update_one({"_id": obj_id}, {"$set": update_payload})
+    
+    if update_data.status == "tracking":
         print(f"📈 Status for {obj_id} changed to 'tracking'. Triggering price update...")
         product_to_scrape = product_collection.find_one({"_id": obj_id})
-        
         if product_to_scrape:
             update_price_for_product(product_to_scrape)
             print(f"✅ Scrape finished for {obj_id}.")

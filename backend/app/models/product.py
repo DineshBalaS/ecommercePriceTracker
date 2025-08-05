@@ -41,6 +41,12 @@ class ProductBase(BaseModel):
 # For product creation
 class ProductCreate(ProductBase):
     current_price: Optional[float] = None  # optional at creation
+    
+class ProductUpdate(BaseModel):
+    desired_price: Optional[float] = None
+    notes: Optional[str] = None
+    # We include 'status' to avoid breaking the existing functionality of the PATCH endpoint
+    status: Optional[str] = None
 
 
 # For MongoDB storage
@@ -49,6 +55,10 @@ class ProductInDB(ProductBase):
     current_price: Optional[float]
     created_at: datetime = Field(default_factory=datetime.utcnow)
     owner_id: PyObjectId
+    
+    price_history: List[PriceHistoryItem] = Field(default_factory=list)
+    historical_low_price: Optional[float] = None
+    historical_high_price: Optional[float] = None
 
     class Config:
         populate_by_name = True
@@ -71,3 +81,7 @@ class ProductOut(ProductBase):
     created_at: datetime
     owner_id: str
     purchased_date: Optional[datetime] = None
+    
+    price_history: List[PriceHistoryItem] = Field(default_factory=list)
+    historical_low_price: Optional[float] = None
+    historical_high_price: Optional[float] = None

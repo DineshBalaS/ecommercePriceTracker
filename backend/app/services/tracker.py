@@ -3,7 +3,7 @@ import sys
 import os
 from pymongo import MongoClient
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
@@ -32,38 +32,68 @@ def update_price_for_product(product: dict):
         product_collection.update_one({"_id": ObjectId(product_id)}, {"$set": {"site_name": inferred_site}})
 
     try:
+        # NEW -> Major logic overhaul for AC-2
         scraped = scrape_product_details(url)
-        if not scraped:
-            print("❌ Scraping failed.")
-            return
+        
+        price_num = None # Default to None for failed scrapes
+        if scraped and isinstance(scraped, dict):
+            price_text = scraped.get("Price", "")
+            if price_text:
+                # This parsing logic remains the same
+                price_num = float("".join(c for c in price_text if c.isdigit() or c == "."))
 
-        # Parse numeric price from scraped dict
-        price_text = scraped.get("Price", "") if isinstance(scraped, dict) else ""
-        price_num = (
-            float("".join(c for c in price_text if c.isdigit() or c == "."))
-            if price_text else 0.0
-        )
+        # NEW -> Always create a history entry. Use UTC for consistency.
+        timestamp = datetime.now(timezone.utc)
+        history_entry = {"price": price_num, "timestamp": timestamp}
         
-        update_payload = {
-            "current_price": price_num
+        # NEW -> Construct a single, efficient update query
+        update_query = {
+            "$push": {"price_history": history_entry}
         }
+        set_operations = {}
+
+        # NEW -> Only perform $set operations if the scrape was successful
+        if price_num is not None:
+            set_operations["current_price"] = price_num
+            
+            # Check for new historical low
+            current_low = product.get("historical_low_price")
+            if current_low is None or price_num < current_low:
+                set_operations["historical_low_price"] = price_num
+                print(f"🎉 New historical low: ₹{price_num}")
+
+            # Check for new historical high
+            current_high = product.get("historical_high_price")
+            if current_high is None or price_num > current_high:
+                set_operations["historical_high_price"] = price_num
+                print(f"📈 New historical high: ₹{price_num}")
+
+            # Update site name if the scraper provides a more accurate one
+            scraped_site_name = scraped.get("SiteName")
+            if scraped_site_name:
+                set_operations["site_name"] = scraped_site_name
         
-        scraped_site_name = scraped.get("SiteName")
-        if scraped_site_name:
-            update_payload["site_name"] = scraped_site_name
+        # NEW -> Add the $set operations to the main query if there are any
+        if set_operations:
+            update_query["$set"] = set_operations
 
         result = product_collection.update_one(
             {"_id": ObjectId(product_id)},
-            {"$set": update_payload}
+            update_query
         )
 
-        if result.modified_count == 1:
-            print(f"✅ Updated price: ₹{price_num}")
+        # NEW -> Improved logging based on outcome
+        if price_num is not None:
+            if result.modified_count > 0:
+                print(f"✅ Successfully updated price to: ₹{price_num}")
+            else:
+                print(f"ℹ️ Price is unchanged: ₹{price_num}")
         else:
-            print(f"⚠️ No update made. Maybe price unchanged or product missing. Here is the current price ₹{price_num}")
+            # This handles the "log it so we can test it" requirement for failed scrapes
+            print("❌ Scraping failed. Logged null price to history.")
 
     except Exception as e:
-        print(f"💥 Error processing product ID {product_id}")
+        print(f"💥 An unexpected error occurred while processing product ID {product_id}")
         print(traceback.format_exc())
 
 
