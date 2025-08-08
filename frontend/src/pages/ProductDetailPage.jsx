@@ -10,6 +10,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Area,
+  AreaChart,
 } from "recharts"; // <-- ADDED recharts
 import { format, subDays } from "date-fns"; // <-- ADDED date-fns
 
@@ -252,10 +254,17 @@ const ProductDetailPage = () => {
         </div>
         <div style={{ width: "100%", height: 300 }}>
           <ResponsiveContainer>
-            <LineChart
+            <AreaChart
               data={chartData}
               margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
             >
+              <defs>
+                <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+
               <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
               <XAxis
                 dataKey="timestamp"
@@ -271,6 +280,14 @@ const ProductDetailPage = () => {
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
+
+              <Area
+                type="monotone"
+                dataKey="price"
+                stroke={false}
+                fill="url(#priceGradient)"
+              />
+
               <Line
                 type="monotone"
                 dataKey="price"
@@ -278,8 +295,9 @@ const ProductDetailPage = () => {
                 strokeWidth={2}
                 dot={false}
                 name="Price (₹)"
+                activeDot={{ r: 6, strokeWidth: 2, fill: "#8884d8" }} // <-- hover effect
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
