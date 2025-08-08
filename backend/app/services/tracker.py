@@ -1,22 +1,20 @@
-import traceback
 import sys
 import os
-from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime, timezone
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
-
+from backend.app.config import db, LOCK_FILE
+from backend.app.utils.logger import logger
 from backend.app.services.scraper_dispatcher import scrape_product_details
 
-# === CONFIG ===
-MONGO_URI = "mongodb://localhost:27017"
-DB_NAME = "price_tracker_db"  # 🔁 change to your actual DB name
+# # === CONFIG ===
+# MONGO_URI = "mongodb://localhost:27017"
+# DB_NAME = "price_tracker_db"  # 🔁 change to your actual DB name
 COLLECTION_NAME = "products"
 
 # === SETUP ===
-client = MongoClient(MONGO_URI)
-db = client[DB_NAME]
+# client = MongoClient(MONGO_URI)
+# db = client[DB_NAME]
 product_collection = db[COLLECTION_NAME]
 
 
@@ -25,7 +23,7 @@ def update_price_for_product(product: dict):
     url = product["url"]
     site_name = product.get("site_name", "")
     
-    print(f"\n🔍 Tracking: {product.get('name', 'Unknown')} (ID: {product_id})")
+    logger.info(f"🔍 Tracking '{product.get('name', 'Unknown')}' (ID: {product_id})")
     
     if product.get("site_name") == "string":
         inferred_site = "Amazon" if "amazon" in url else "Flipkart" if "flipkart" in url else "Unknown"
@@ -56,19 +54,16 @@ def update_price_for_product(product: dict):
         if price_num is not None:
             set_operations["current_price"] = price_num
             
-            # Check for new historical low
             current_low = product.get("historical_low_price")
             if current_low is None or price_num < current_low:
                 set_operations["historical_low_price"] = price_num
-                print(f"🎉 New historical low: ₹{price_num}")
+                logger.info(f"🎉 New historical low for {product_id}: ₹{price_num}")
 
-            # Check for new historical high
             current_high = product.get("historical_high_price")
             if current_high is None or price_num > current_high:
                 set_operations["historical_high_price"] = price_num
-                print(f"📈 New historical high: ₹{price_num}")
+                logger.info(f"📈 New historical high for {product_id}: ₹{price_num}")
 
-            # Update site name if the scraper provides a more accurate one
             scraped_site_name = scraped.get("SiteName")
             if scraped_site_name:
                 set_operations["site_name"] = scraped_site_name
@@ -85,28 +80,42 @@ def update_price_for_product(product: dict):
         # NEW -> Improved logging based on outcome
         if price_num is not None:
             if result.modified_count > 0:
-                print(f"✅ Successfully updated price to: ₹{price_num}")
+                logger.info(f"✅ Successfully updated price for {product_id} to: ₹{price_num}")
             else:
-                print(f"ℹ️ Price is unchanged: ₹{price_num}")
+                logger.info(f"ℹ️ Price for {product_id} is unchanged: ₹{price_num}")
         else:
-            # This handles the "log it so we can test it" requirement for failed scrapes
-            print("❌ Scraping failed. Logged null price to history.")
-
+            logger.warning(f"❌ Scraping failed for {product_id}. Logged null price to history.")
+            
     except Exception as e:
-        print(f"💥 An unexpected error occurred while processing product ID {product_id}")
-        print(traceback.format_exc())
+        logger.exception(f"💥 An unexpected error occurred while processing product ID {product_id}")
 
 
 def run_price_tracker():
-    print("📦 Starting price tracker run...")
-    products = product_collection.find({"status": "tracking"})
+    if os.path.exists(LOCK_FILE):
+        logger.warning("🔒 Lock file exists. Another tracking process is likely running. Aborting.")
+        return
+    
+    try:
+        # Create the lock file to signal a run has started
+        with open(LOCK_FILE, 'w') as f:
+            f.write(str(os.getpid()))
+        logger.info("==============================================")
+        logger.info("📦 Starting new price tracker run...")
+        products = product_collection.find({"status": "tracking"})
 
-    count = 0
-    for product in products:
-        update_price_for_product(product)
-        count += 1
+        count = 0
+        for product in products:
+            update_price_for_product(product)
+            count += 1
 
-    print(f"\n🏁 Finished tracking {count} product(s) at {datetime.now().isoformat()}")
+        logger.info(f"🏁 Finished tracking {count} product(s).")
+        logger.info("==============================================\n")
+    
+    finally:
+        # This block will run whether the script succeeds or fails
+        if os.path.exists(LOCK_FILE):
+            os.remove(LOCK_FILE)
+            logger.info("🔑 Lock file removed. Run complete.")
 
 
 if __name__ == "__main__":

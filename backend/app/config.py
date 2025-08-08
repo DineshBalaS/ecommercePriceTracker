@@ -9,6 +9,10 @@ load_dotenv(dotenv_path=env_path)
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = os.getenv("DB_NAME")
 
+BACKEND_DIR = os.path.dirname(os.path.dirname(__file__))
+LOG_FILE = os.path.join(BACKEND_DIR, 'tracker.log')
+LOCK_FILE = os.path.join(BACKEND_DIR, 'tracker.lock')
+
 if not MONGO_URI or not DB_NAME:
     raise ValueError("MONGO_URI or DB_NAME not found in environment variables.")
 

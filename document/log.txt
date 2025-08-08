@@ -225,7 +225,7 @@ Last Updated: 2025-08-05
 AC-1: [DB Schema] Update Product Model
 ==================================================
 File: app/models/product.py
-Status: Pending
+Status: Done
 
 [x] 1.1: Create `PriceHistoryItem` Model
     - Define a new `BaseModel` called `PriceHistoryItem`.
@@ -265,7 +265,7 @@ Status: Pending
 AC-3: [New API Endpoint] Create GET /api/products/{id}
 ==================================================
 File: app/routes/product.py
-Status: Pending
+Status: Done
 
 [x] 3.1: Define New Route
     - Create a new endpoint: `@product_router.get("/{id}", response_model=ProductOut)`.
@@ -384,3 +384,76 @@ Objective: Build the three main UI sections of the page within ProductDetailPage
         - Use a `useEffect` to populate these form fields with `product.desired_price` and `product.notes` once the product data is loaded.
         - The "Save" button's `onClick` handler will call the `updateProductDetails()` API function with the new form values.
         - Add state to handle the saving process (e.g., a "Saving..." message on the button).
+
+Cron job Feature - > 
+
+### Implementation Plan: Automated, Robust Scheduling for Price Tracker
+
+**Story:** `As a developer, I want to automate the price tracking script to run periodically without manual intervention, so that product prices are updated reliably and consistently for all users.`
+**Status:** `PLANNING_COMPLETE`
+**Assignee:** `Gemini`
+
+---
+
+#### Phase 1: Code Refactoring & Hardening (AC-1, AC-3)
+
+*This phase focuses on making the script robust, maintainable, and ready for an unattended environment.*
+
+* **Task 1.1: Centralize Configuration**
+    * `[x]` **Status: DONE**
+    * **Action:** Modify `backend/app/services/tracker.py` to remove the hardcoded `MONGO_URI` and `DB_NAME`.
+    * **Action:** Import and use the existing `db` instance from `backend/app/config.py`.
+    * **Reasoning:** Eliminates duplicate configuration and makes the script respect the `.env` file, which is crucial for different environments (dev/prod).
+
+* **Task 1.2: Implement Centralized Logging**
+    * `[x]` **Status: DONE**
+    * **Action:** Create a new file `backend/app/utils/logger.py` to configure a shared logger instance.
+        * The logger will have a `StreamHandler` to print to the console (for manual runs).
+        * The logger will have a `FileHandler` to write to `backend/tracker.log`.
+        * The log format will be: `%(asctime)s - %(levelname)s - %(message)s`.
+    * **Action:** In `backend/app/config.py`, add a new variable `LOG_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'tracker.log')`.
+    * **Action:** Replace all `print()` statements in the following files with appropriate logger calls (`logger.info`, `logger.warning`, `logger.error`):
+        * `[x]` `backend/app/services/tracker.py`
+        * `[x]` `backend/app/services/scraper.py`
+        * `[x]` `backend/app/services/flipkart_scraper.py`
+    * **Action:** In `tracker.py`, change the `except Exception as e` block to use `logger.exception("...")` to automatically capture the full stack trace in the log file.
+    * **Reasoning:** Fulfills AC-1 by replacing `print()` with a formal, persistent logging mechanism.
+
+* **Task 1.3: Implement File-based Locking**
+    * `[x]` **Status: DONE**
+    * **Action:** In `backend/app/config.py`, add a new variable `LOCK_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'tracker.lock')`.
+    * **Action:** Modify the `run_price_tracker` function in `tracker.py`.
+        * At the very beginning, check if the lock file exists. If it does, log a warning (`"Previous run is still active. Exiting."`) and `return`.
+        * Wrap the entire tracking logic in a `try...finally` block.
+        * In the `try` block, create the empty lock file immediately.
+        * In the `finally` block, ensure the lock file is removed.
+    * **Reasoning:** Fulfills AC-1 and AC-3 by preventing concurrent runs and ensuring graceful handling if a previous job is still active. The `finally` block guarantees cleanup.
+
+---
+
+#### Phase 2: Scheduling & Deployment (AC-2)
+
+*This phase focuses on setting up the automated execution environment.*
+
+* **Task 2.1: Document Environment Paths**
+    * `[x]` **Status: DONE**
+    * **Goal:** Find the absolute paths needed for the cron job.
+    * **Step 1 (VENV Python):** Activate the virtual environment (`source venv/bin/activate`) and run `which python`. Record the full path (e.g., `/home/user/priceTrackerApp/backend/venv/bin/python`).
+    * **Step 2 (Project Script):** Get the absolute path to the tracker script (e.g., `/home/user/priceTrackerApp/backend/app/services/tracker.py`).
+    * **Step 3 (System PATH):** In the same active terminal, run `echo $PATH`. Record this entire string. This is critical for Playwright to find its browser dependencies.
+
+* **Task 2.2: Create Cron Job**
+    * `[ ]` **Status: NOT_STARTED**
+    * **Action:** Open the crontab editor by running `crontab -e`.
+    * **Action:** Add the following lines to the file, replacing the placeholder paths with the ones recorded in Task 2.1.
+
+    ```bash
+    # Set the PATH to ensure all dependencies, especially for Playwright, are found
+    PATH=/recorded/path/from/echo/command
+
+    # Run the Price Tracker App script every 10 minutes
+    */10 * * * * /path/to/venv/python /path/to/project/backend/app/services/tracker.py
+    ```
+    * **Reasoning:** Fulfills AC-2 by scheduling the script to run every 10 minutes using the correct virtual environment and a properly configured `PATH` for reliability. The script's internal logging handles all output, so no shell redirection is needed.
+
+---

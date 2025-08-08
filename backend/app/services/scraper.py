@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from backend.app.utils.logger import logger
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
@@ -23,7 +24,7 @@ def scrape_amazon_product(url):
         response = requests.get(url, headers=HEADERS, timeout=10)
         response.raise_for_status()
     except requests.RequestException as e:
-        print(f"[Amazon Scraper] Request failed: {e}")
+        logger.error(f"[Amazon Scraper] Request failed for URL '{url}': {e}")
         return None
 
     soup = BeautifulSoup(response.text, 'html.parser')

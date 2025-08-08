@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 from bs4 import BeautifulSoup
+from backend.app.utils.logger import logger
 
 def get_flipkart_page_html(url: str) -> str | None:
     """Fetch page HTML using Playwright."""
@@ -16,9 +17,9 @@ def get_flipkart_page_html(url: str) -> str | None:
             page.wait_for_selector("body", timeout=10000)
             return page.content()
         except PlaywrightTimeoutError:
-            print("[Error] Timeout while loading the page.")
+            logger.error(f"[Flipkart Scraper] Timeout while loading page: {url}")
         except Exception as e:
-            print(f"[Error] Failed to load page: {e}")
+            logger.error(f"[Flipkart Scraper] Failed to load page: {url}", exc_info=True)
         finally:
             browser.close()
 
