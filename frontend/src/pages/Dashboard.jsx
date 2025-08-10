@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/Authcontext";
+import { useTheme } from "../context/ThemeContext";
 import api from "../api/api"; // Import the pre-configured axios instance
 
 // --- SVG Icons (No changes needed) ---
@@ -31,6 +32,8 @@ const icons = {
     "M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z",
   history:
     "M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z",
+  sun: "M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 010 1.06l-1.591 1.59a.75.75 0 11-1.06-1.06l1.59-1.59a.75.75 0 011.06 0zm-11.457 0a.75.75 0 011.06 0l1.59 1.59a.75.75 0 01-1.06 1.06l-1.59-1.59a.75.75 0 010-1.06zM12 18a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V18.75a.75.75 0 01.75-.75zM5.106 18.894a.75.75 0 010-1.06l1.59-1.59a.75.75 0 111.06 1.06l-1.59 1.59a.75.75 0 01-1.06 0zM18.894 18.894a.75.75 0 01-1.06 0l-1.59-1.59a.75.75 0 011.06-1.06l1.59 1.59a.75.75 0 010 1.06zM3.75 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H4.5a.75.75 0 01-.75-.75zM17.25 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H18a.75.75 0 01-.75-.75z",
+  moon: "M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z",
   trash:
     "M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0",
 };
@@ -38,6 +41,7 @@ const icons = {
 // --- Main Dashboard Component ---
 const Dashboard = () => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   // --- State for API data ---
   const [trackedProducts, setTrackedProducts] = useState([]);
@@ -231,17 +235,16 @@ const Dashboard = () => {
     if (!productToDelete) return; // Guard clause
 
     try {
-      await api.delete(`/products/${productToDelete}`);
+      await api.delete(`/products/${productToDelete.id}`);
 
       // Instant UI update: filter the product out of the state
       setTrackedProducts((prev) =>
-        prev.filter((p) => p.id !== productToDelete)
+        prev.filter((p) => p.id !== productToDelete.id)
       );
       setPurchaseHistory((prev) =>
-        prev.filter((p) => p.id !== productToDelete)
+        prev.filter((p) => p.id !== productToDelete.id)
       );
-      setWatchlist((prev) => prev.filter((p) => p.id !== productToDelete));
-
+      setWatchlist((prev) => prev.filter((p) => p.id !== productToDelete.id));
       // Close the confirmation modal
       setProductToDelete(null);
     } catch (err) {
@@ -263,20 +266,20 @@ const Dashboard = () => {
     if (product.status === "purchased") {
       // Assuming you have a status field
       return (
-        <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">
+        <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 dark:text-blue-300 dark:bg-blue-900/50 rounded-full">
           Purchased
         </span>
       );
     }
     if (currentPrice > 0 && currentPrice <= desiredPrice) {
       return (
-        <span className="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
+        <span className="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 dark:text-green-300 dark:bg-green-900/50 rounded-full">
           Price Alert!
         </span>
       );
     }
     return (
-      <span className="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">
+      <span className="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 dark:text-yellow-300 dark:bg-yellow-900/50 rounded-full">
         Tracking
       </span>
     );
@@ -308,7 +311,7 @@ const Dashboard = () => {
   const renderContent = () => {
     if (loading) {
       return (
-        <div className="text-center text-gray-500">
+        <div className="text-center text-gray-500 dark:text-gray-400">
           Loading your products...
         </div>
       );
@@ -337,10 +340,12 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
           {filteredTrackedProducts.map((product) => (
             // MODIFIED -> Wrap the card div with a Link component
-            <Link key={product.id} to={`/product/${product.id}`} className="block">
-              <div
-                className="bg-white rounded-lg shadow p-4 flex flex-col justify-between transition hover:shadow-lg h-full"
-              >
+            <Link
+              key={product.id}
+              to={`/product/${product.id}`}
+              className="block"
+            >
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4 flex flex-col justify-between transition hover:shadow-lg h-full">
                 <div>
                   <div className="flex items-start gap-4">
                     <img
@@ -352,10 +357,10 @@ const Dashboard = () => {
                       className="w-20 h-20 object-cover rounded-md flex-shrink-0"
                     />
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-800 leading-tight">
+                      <p className="font-semibold text-gray-800 dark:text-gray-100 leading-tight">
                         {product.name || "Product Name"}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         {getStoreDisplayName(product)}
                       </p>
                     </div>
@@ -365,27 +370,26 @@ const Dashboard = () => {
                     >
                       <button
                         onClick={(e) => {
-                          // NEW -> Prevent link navigation when clicking the menu
                           e.preventDefault();
                           e.stopPropagation();
                           setOpenMenuId(
                             openMenuId === product.id ? null : product.id
                           );
                         }}
-                        className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+                        className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full"
                       >
                         <Icon path={icons.options} className="w-5 h-5" />
                       </button>
                       {openMenuId === product.id && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-100">
+                        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 rounded-md shadow-lg z-10 border border-gray-100 dark:border-slate-700">
                           <div className="py-1">
                             <button
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                handleSaveForLater(product.id)
+                                handleSaveForLater(product.id);
                               }}
-                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
                             >
                               Save for later?
                             </button>
@@ -393,10 +397,10 @@ const Dashboard = () => {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                setProductToDelete(product.id);
+                                setProductToDelete(product);
                                 setOpenMenuId(null);
                               }}
-                              className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                              className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/50"
                             >
                               Delete Product
                             </button>
@@ -407,29 +411,33 @@ const Dashboard = () => {
                   </div>
                   <div className="mt-4 flex justify-between items-baseline">
                     <div>
-                      <p className="text-sm text-gray-500">Current Price</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Current Price
+                      </p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-gray-50">
                         ₹{(product.current_price || 0).toFixed(2)}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-500">Desired</p>
-                      <p className="text-lg font-semibold text-gray-600">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Desired
+                      </p>
+                      <p className="text-lg font-semibold text-gray-600 dark:text-gray-300">
                         ₹{(product.desired_price || 0).toFixed(2)}
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700 flex justify-between items-center">
                   {getStatusPill(product)}
                   <div className="flex gap-2">
                     <button
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        handleMarkAsPurchased(product)
+                        handleMarkAsPurchased(product);
                       }}
-                      className="text-xs text-gray-500 hover:text-purple-700 hover:underline"
+                      className="text-xs text-gray-500 dark:text-gray-400 hover:text-purple-700 dark:hover:text-purple-400 hover:underline"
                     >
                       Mark as Purchased
                     </button>
@@ -463,47 +471,40 @@ const Dashboard = () => {
         );
       }
       return (
-        <div className="grid grid-cols-1 md-grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
           {filteredWatchlist.map((product) => (
             <div
               key={product.id}
-              className="bg-white rounded-lg shadow p-4 flex flex-col justify-between transition hover:shadow-lg"
+              className="bg-white dark:bg-slate-800 rounded-lg shadow p-4 flex flex-col justify-between transition hover:shadow-lg"
             >
               <div className="flex items-start gap-4">
-                <img
-                  src={
-                    product.image_url ||
-                    "https://placehold.co/100x100/E0E7FF/3730A3?text=Saved"
-                  }
-                  alt={product.name}
-                  className="w-20 h-20 object-cover rounded-md flex-shrink-0"
-                />
+                {/* ... image ... */}
                 <div className="flex-1">
-                  <p className="font-semibold text-gray-800 leading-tight">
+                  <p className="font-semibold text-gray-800 dark:text-gray-100 leading-tight">
                     {product.name}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {getStoreDisplayName(product)}
                   </p>
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                     Current Price:{" "}
-                    <span className="font-medium text-gray-600">
+                    <span className="font-medium text-gray-600 dark:text-gray-300">
                       ₹{(product.current_price || 0).toFixed(2)}
                     </span>
                   </p>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-2">
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700 flex items-center gap-2">
                 <button
                   onClick={() => handleStartTracking(product.id)}
-                  className="flex-grow bg-purple-100 text-purple-700 font-semibold py-2 px-4 rounded-lg hover:bg-purple-200 transition"
+                  className="flex-grow bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-400 font-semibold py-2 px-4 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/80 transition"
                 >
                   Start Tracking
                 </button>
                 <button
-                  onClick={() => setProductToDelete(product.id)}
+                  onClick={() => setProductToDelete(product)}
                   title="Delete Product"
-                  className="flex-shrink-0 p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-full transition"
+                  className="flex-shrink-0 p-2 text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-slate-700 hover:text-red-600 dark:hover:text-red-500 rounded-full transition"
                 >
                   <Icon path={icons.trash} className="w-5 h-5" />
                 </button>
@@ -529,7 +530,7 @@ const Dashboard = () => {
           {purchaseHistory.map((product) => (
             <div
               key={product.id}
-              className="bg-white rounded-lg shadow p-4 flex flex-col justify-between"
+              className="bg-white dark:bg-slate-800 rounded-lg shadow p-4 flex flex-col justify-between transition hover:shadow-lg"
             >
               <div>
                 <div className="flex items-start gap-4">
@@ -542,31 +543,37 @@ const Dashboard = () => {
                     className="w-20 h-20 object-cover rounded-md flex-shrink-0"
                   />
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-800 leading-tight">
+                    <p className="font-semibold text-gray-800 dark:text-gray-100 leading-tight">
                       {product.name}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {getStoreDisplayName(product)}
                     </p>
                   </div>
                   <button
-                    onClick={() => setProductToDelete(product.id)}
+                    onClick={() => setProductToDelete(product)}
                     title="Delete Product"
-                    className="flex-shrink-0 p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 rounded-full transition"
+                    className="flex-shrink-0 p-2 text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-slate-700 hover:text-red-600 dark:hover:text-red-500 rounded-full transition"
                   >
                     <Icon path={icons.trash} className="w-5 h-5" />
                   </button>
                 </div>
                 <div className="mt-4 flex justify-between items-baseline">
                   <div>
-                    <p className="text-sm text-gray-500">Purchased at</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Purchased at
+                    </p>
+                    {/* ✅ Added dark mode text color */}
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-50">
                       ₹{(product.current_price || 0).toFixed(2)}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-500">Purchased on</p>
-                    <p className="text-base font-semibold text-gray-600">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Purchased on
+                    </p>
+                    {/* ✅ Added dark mode text color */}
+                    <p className="text-base font-semibold text-gray-600 dark:text-gray-300">
                       {new Date(
                         product.purchased_date || product.created_at
                       ).toLocaleDateString()}
@@ -574,7 +581,7 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700 flex justify-between items-center">
                 {getStatusPill(product)}
               </div>
             </div>
@@ -585,11 +592,11 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-sans">
+    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 font-sans">
       {/* --- Sidebar --- */}
-      <aside className="hidden md:flex md:w-64 flex-shrink-0 bg-white border-r border-gray-200 flex-col">
-        <div className="h-16 flex items-center justify-center px-4 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-purple-700">
+      <aside className="hidden md:flex md:w-64 flex-shrink-0 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 flex-col">
+        <div className="h-16 flex items-center justify-center px-4 border-b border-gray-200 dark:border-slate-700">
+          <h1 className="text-2xl font-bold text-purple-700 dark:text-purple-400">
             EcomPriceTracker
           </h1>
         </div>
@@ -597,8 +604,10 @@ const Dashboard = () => {
           <a
             href="#"
             onClick={() => setActiveTab("dashboard")}
-            className={`flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-purple-100 hover:text-purple-700 transition-colors ${
-              activeTab === "dashboard" ? "bg-purple-100 text-purple-700" : ""
+            className={`flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-purple-100 dark:hover:bg-slate-700 hover:text-purple-700 dark:hover:text-gray-100 transition-colors ${
+              activeTab === "dashboard"
+                ? "bg-purple-100 text-purple-700 dark:bg-slate-700 dark:text-gray-100"
+                : ""
             }`}
           >
             <Icon path={icons.dashboard} />
@@ -607,8 +616,10 @@ const Dashboard = () => {
           <a
             href="#"
             onClick={() => setActiveTab("watchlist")}
-            className={`flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-purple-100 hover:text-purple-700 transition-colors ${
-              activeTab === "watchlist" ? "bg-purple-100 text-purple-700" : ""
+            className={`flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-purple-100 dark:hover:bg-slate-700 hover:text-purple-700 dark:hover:text-gray-100 transition-colors ${
+              activeTab === "watchlist"
+                ? "bg-purple-100 text-purple-700 dark:bg-slate-700 dark:text-gray-100"
+                : ""
             }`}
           >
             <Icon path={icons.watchlist} />
@@ -616,18 +627,18 @@ const Dashboard = () => {
           </a>
         </nav>
         <div
-          className="relative px-4 py-4 border-t border-gray-200"
+          className="relative px-4 py-4 border-t border-gray-200 dark:border-slate-700"
           ref={profileMenuRef}
         >
           {isProfileMenuOpen && (
-            <div className="absolute left-4 right-4 bottom-full mb-2 w-auto bg-white rounded-md shadow-lg z-20 border border-gray-100">
+            <div className="absolute left-4 right-4 bottom-full mb-2 w-auto bg-white dark:bg-slate-900 rounded-md shadow-lg z-20 border border-gray-100 dark:border-slate-700">
               <div className="py-1">
                 <button
                   onClick={() => {
                     setActiveTab("history");
                     setProfileMenuOpen(false);
                   }}
-                  className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-100 hover:text-purple-700"
+                  className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-slate-700 hover:text-purple-700 dark:hover:text-gray-100"
                 >
                   <Icon path={icons.history} className="w-5 h-5 mr-3" />
                   Purchase History
@@ -637,7 +648,7 @@ const Dashboard = () => {
                     logout();
                     setProfileMenuOpen(false);
                   }}
-                  className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/50"
                 >
                   <Icon path={icons.logout} className="w-5 h-5 mr-3" />
                   Logout
@@ -647,9 +658,12 @@ const Dashboard = () => {
           )}
           <button
             onClick={() => setProfileMenuOpen((prev) => !prev)}
-            className="flex items-center w-full px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex items-center w-full px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
           >
-            <Icon path={icons.user} className="w-6 h-6 text-gray-500" />
+            <Icon
+              path={icons.user}
+              className="w-6 h-6 text-gray-500 dark:text-gray-400"
+            />
             <span className="ml-3 font-semibold truncate">
               {user?.username || "My Account"}
             </span>
@@ -661,8 +675,10 @@ const Dashboard = () => {
       <main className="flex-1 p-8 overflow-y-auto">
         <header className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-gray-800">Welcome back!</h2>
-            <p className="text-gray-500">
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
+              Welcome back!
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400">
               Here's your product tracking overview.
             </p>
           </div>
@@ -670,14 +686,14 @@ const Dashboard = () => {
             <div className="relative">
               <Icon
                 path={icons.search}
-                className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
               />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search products..."
-                className="pl-10 pr-4 py-2 border rounded-lg w-64 focus:ring-2 focus:ring-purple-600 focus:outline-none"
+                className="pl-10 pr-4 py-2 border dark:border-slate-600 rounded-lg w-64 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-600 focus:outline-none"
               />
               {searchQuery && (
                 <button
@@ -697,8 +713,19 @@ const Dashboard = () => {
               )}
             </div>
             <button
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              className="p-2 rounded-full text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 transition"
+            >
+              {theme === "light" ? (
+                <Icon path={icons.moon} className="w-5 h-5" />
+              ) : (
+                <Icon path={icons.sun} className="w-5 h-5 text-yellow-500" />
+              )}
+            </button>
+            <button
               onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-purple-800 transition"
+              className="flex items-center gap-2 bg-purple-700 dark:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-purple-800 dark:hover:bg-purple-700 transition"
             >
               <Icon path={icons.add} className="w-5 h-5" />
               Track New Product
@@ -707,7 +734,7 @@ const Dashboard = () => {
         </header>
 
         {/* Content Area */}
-        <h3 className="text-xl font-semibold text-gray-700 mb-4">
+        <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">
           {activeTab === "dashboard"
             ? `My Watchlist (${filteredTrackedProducts.length})`
             : activeTab === "watchlist"
@@ -719,16 +746,16 @@ const Dashboard = () => {
 
       {/* --- Track New Product Modal --- */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl p-8 w-full max-w-md">
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
               Track a New Product
             </h3>
             <form onSubmit={handleTrackNewProduct}>
               <div className="mb-4">
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
                   Product Name
                 </label>
@@ -738,7 +765,7 @@ const Dashboard = () => {
                   value={newProductName}
                   onChange={(e) => setNewProductName(e.target.value)}
                   placeholder="e.g., Sony WH-1000XM5 Headphones"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  className="w-full px-4 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                   required
                 />
               </div>
@@ -755,7 +782,7 @@ const Dashboard = () => {
                   value={newProductUrl}
                   onChange={(e) => setNewProductUrl(e.target.value)}
                   placeholder="https://www.amazon.com/product/..."
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  className="w-full px-4 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                   required
                 />
               </div>
@@ -772,7 +799,7 @@ const Dashboard = () => {
                   value={newProductPrice}
                   onChange={(e) => setNewProductPrice(e.target.value)}
                   placeholder="Enter a price to be notified at"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                  className="w-full px-4 py-2 border dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
                   step="0.01"
                   required
                 />
@@ -781,13 +808,13 @@ const Dashboard = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                  className="px-4 py-2 bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-purple-700 text-white font-semibold rounded-lg hover:bg-purple-800"
+                  className="px-4 py-2 bg-purple-700 dark:bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-800 dark:hover:bg-purple-700"
                 >
                   Start Tracking
                 </button>
@@ -798,25 +825,20 @@ const Dashboard = () => {
       )}
 
       {productToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md mx-4">
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">
-              {/* ✨ NEW - Conditional title */}
-              {purchaseHistory.find((p) => p.id === productToDelete)
-                ? "Remove from History?"
-                : "Confirm Deletion"}
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl p-8 w-full max-w-md mx-4">
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+              Confirm Deletion
             </h3>
-            <p className="text-gray-600 mb-6">
-              {/* ✨ NEW - Conditional message */}
-              {purchaseHistory.find((p) => p.id === productToDelete)
-                ? "Are you sure you want to permanently remove this item from your purchase history? This action cannot be undone."
-                : "Are you sure you want to permanently delete this product? This action cannot be undone."}
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Are you sure you want to delete '{productToDelete.name}'? This
+              action cannot be undone.
             </p>
             <div className="flex justify-end gap-4">
               <button
                 type="button"
                 onClick={() => setProductToDelete(null)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+                className="px-4 py-2 bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition"
               >
                 Cancel
               </button>

@@ -31,65 +31,71 @@ const Signup = () => {
   return (
     <div className="flex h-screen font-sans">
       {/* Left Side - Form */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-6 md:px-20">
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-6 md:px-20 bg-white dark:bg-gray-900">
+        {" "}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-purple-700">
+          <h1 className="text-3xl font-bold text-purple-700 dark:text-purple-400">
             EcomPriceTracker
           </h1>
         </div>
-
         <div className="w-full max-w-md">
-          <h2 className="text-2xl font-semibold">Create an account</h2>
-          <p className="text-sm text-gray-500 mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            Create an account
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
             Please fill in the details below
           </p>
 
           {/* 👇 Attach the submit handler to the form */}
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-sm font-medium mb-1">Username</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Username
+              </label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
                 placeholder="Choose a unique username"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email address
               </label>
               <input
                 type="email"
                 value={email} // 👈 Bind value to state
                 onChange={(e) => setEmail(e.target.value)} // 👈 Update state on change
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
                 placeholder="you@example.com"
                 required // 👈 Add required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Password
+              </label>
               <input
                 type="password"
                 value={password} // 👈 Bind value to state
                 onChange={(e) => setPassword(e.target.value)} // 👈 Update state on change
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
                 placeholder="Create a password (min 6 chars)"
                 required // 👈 Add required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Confirm Password
               </label>
               <input
                 type="password"
                 value={confirmPassword} // 👈 Bind value to state
                 onChange={(e) => setConfirmPassword(e.target.value)} // 👈 Update state on change
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full px-4 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
                 placeholder="Re-enter password"
                 required // 👈 Add required
               />
@@ -97,7 +103,7 @@ const Signup = () => {
 
             <button
               type="submit"
-              className="w-full bg-purple-700 text-white py-2 rounded-md hover:bg-purple-800 transition"
+              className="w-full bg-purple-700 dark:bg-purple-600 text-white py-2 rounded-md hover:bg-purple-800 dark:hover:bg-purple-700 transition"
             >
               Sign up
             </button>
@@ -111,7 +117,7 @@ const Signup = () => {
 
             <button
               type="button"
-              className="w-full border flex justify-center items-center gap-2 py-2 rounded-md hover:bg-gray-100 transition"
+              className="w-full border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 flex justify-center items-center gap-2 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 transition"
             >
               <img
                 src="https://www.svgrepo.com/show/475656/google-color.svg"
@@ -122,9 +128,12 @@ const Signup = () => {
             </button>
           </form>
 
-          <p className="text-sm text-center text-gray-600 mt-6">
+          <p className="text-sm text-center text-gray-600 dark:text-gray-400 mt-6">
             Already have an account?{" "}
-            <Link to="/login" className="text-purple-600 hover:underline">
+            <Link
+              to="/login"
+              className="text-purple-600 dark:text-purple-400 hover:underline"
+            >
               Log in
             </Link>
           </p>

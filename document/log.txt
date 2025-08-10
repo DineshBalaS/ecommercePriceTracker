@@ -457,3 +457,47 @@ Cron job Feature - >
     * **Reasoning:** Fulfills AC-2 by scheduling the script to run every 10 minutes using the correct virtual environment and a properly configured `PATH` for reliability. The script's internal logging handles all output, so no shell redirection is needed.
 
 ---
+
+Dark mode - > 
+
+## ✅ Dark Mode Feature Checklist (EPT-132)
+
+### Task 1: Create Theme Context
+- [x] Create new file `src/context/ThemeContext.js`.
+- [x] Implement state management for the theme (`'light'` or `'dark'`).
+- [x] Implement `toggleTheme` function.
+- [x] Add `useEffect` to read initial theme from `localStorage` or `prefers-color-scheme`.
+- [x] Add `useEffect` to toggle the `dark` class on the `<html>` element.
+- [x] Add `useEffect` to write the current theme to `localStorage` on change.
+- [x] Export `ThemeProvider` component and `useTheme()` custom hook.
+
+### Task 2: Configure Tailwind CSS
+- [x] Locate and open `tailwind.config.js`.
+- [x] Add `darkMode: 'class'` to the configuration.
+
+### Task 3: Integrate ThemeProvider
+- [x] Import `ThemeProvider` in `src/App.js`.
+- [x] Wrap the `<AuthProvider>` with the `<ThemeProvider>`.
+
+### Task 4: Build Theme Toggle UI
+- [x] Add new `sun` and `moon` SVG icon paths to the `icons` object in `Dashboard.jsx`.
+- [x] Add a new `<button>` to the `<header>` section of `Dashboard.jsx`.
+- [x] Use the `useTheme()` hook to get the current theme and `toggleTheme` function.
+- [x] Implement conditional rendering for the Sun/Moon icons based on the current theme.
+- [x] Attach the `toggleTheme` function to the button's `onClick` event.
+
+### Task 5: Apply Dark Styles
+- [x] **Dashboard.jsx**:
+    - [x] Apply `dark:` variants to main page background (`bg-gray-100`).
+    - [x] Apply `dark:` variants to the sidebar (`bg-white`).
+    - [x] Apply `dark:` variants to all product cards, dropdowns, and menus (`bg-white`, text, borders).
+    - [x] Apply `dark:` variants to all modals (`bg-white`, text, inputs, buttons).
+    - [x] Apply `dark:` variants to text, inputs, and buttons in the header.
+- [x] **Login.jsx & Signup.jsx**:
+    - [x] Apply `dark:` variants to the main background and form container.
+    - [x] Apply `dark:` variants to input fields, labels, and buttons.
+    - [x] Ensure all text colors have sufficient contrast in dark mode.
+- [ ] **index.css**:
+    - [ ] Create a `.dark` parent selector block.
+    - [ ] Add dark-themed `::-webkit-scrollbar-*` rules within the `.dark` block.
+    - [ ] Update the Firefox `scrollbar-color` property for the `.dark` theme.
