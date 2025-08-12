@@ -604,25 +604,39 @@ const Dashboard = () => {
           <a
             href="#"
             onClick={() => setActiveTab("dashboard")}
-            className={`flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-purple-100 dark:hover:bg-slate-700 hover:text-purple-700 dark:hover:text-gray-100 transition-colors ${
+            className={`group flex items-center px-4 py-2 rounded-lg transition-colors ${
               activeTab === "dashboard"
                 ? "bg-purple-100 text-purple-700 dark:bg-slate-700 dark:text-gray-100"
-                : ""
+                : "text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-slate-700 hover:text-purple-700 dark:hover:text-gray-100"
             }`}
           >
-            <Icon path={icons.dashboard} />
+            <Icon
+              path={icons.dashboard}
+              className={`w-6 h-6 transition-colors ${
+                activeTab === "dashboard"
+                  ? "text-purple-700 dark:text-gray-100" // Active state colors
+                  : "text-gray-500 dark:text-gray-400 group-hover:text-purple-700 dark:group-hover:text-gray-100" // Inactive + hover state colors
+              }`}
+            />
             <span className="ml-3">My Watchlist</span>
           </a>
           <a
             href="#"
             onClick={() => setActiveTab("watchlist")}
-            className={`flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-purple-100 dark:hover:bg-slate-700 hover:text-purple-700 dark:hover:text-gray-100 transition-colors ${
+            className={`group flex items-center px-4 py-2 rounded-lg transition-colors ${
               activeTab === "watchlist"
                 ? "bg-purple-100 text-purple-700 dark:bg-slate-700 dark:text-gray-100"
-                : ""
+                : "text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-slate-700 hover:text-purple-700 dark:hover:text-gray-100"
             }`}
           >
-            <Icon path={icons.watchlist} />
+            <Icon
+              path={icons.watchlist}
+              className={`w-6 h-6 transition-colors ${
+                activeTab === "watchlist"
+                  ? "text-purple-700 dark:text-gray-100" // Active state colors
+                  : "text-gray-500 dark:text-gray-400 group-hover:text-purple-700 dark:group-hover:text-gray-100" // Inactive + hover state colors
+              }`}
+            />
             <span className="ml-3">Saved for Later</span>
           </a>
         </nav>
