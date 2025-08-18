@@ -29,7 +29,7 @@ const icons = {
     "M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m-3-3l3-3m0 0l-3-3m3 3H9",
   add: "M12 4.5c.414 0 .75.336.75.75v6h6a.75.75 0 010 1.5h-6v6a.75.75 0 01-1.5 0v-6h-6a.75.75 0 010-1.5h6v-6c0-.414.336-.75.75-.75z",
   search:
-    "M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z",
+    "M11.742 10.344a6.5 6.5 0 10-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 001.415-1.414l-3.85-3.85a1.007 1.007 0 00-.115-.1zM12 6.5a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z",
   options:
     "M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z",
   history:
@@ -407,7 +407,7 @@ const Dashboard = () => {
       }
       return (
         <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start p-1 pr-2">
-           {" "}
+          {" "}
           {filteredTrackedProducts.map((product) => (
             // MODIFIED -> Wrap the card div with a Link component
             <Link
@@ -542,7 +542,7 @@ const Dashboard = () => {
       }
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-1 md:flex-none min-h-0 overflow-y-auto md:overflow-visible pr-2 content-start">
-           {" "}
+          {" "}
           {filteredWatchlist.map((product) => (
             <div
               key={product.id}
@@ -598,7 +598,7 @@ const Dashboard = () => {
       }
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-1 md:flex-none min-h-0 overflow-y-auto md:overflow-visible pr-2 content-start">
-           {" "}
+          {" "}
           {purchaseHistory.map((product) => (
             <div
               key={product.id}
@@ -682,16 +682,24 @@ const Dashboard = () => {
         >
           <Icon path={icons.hamburger} className="w-6 h-6" />
         </button>
-        <h1 className="text-xl font-bold text-purple-700 dark:text-purple-400">
-          EcomPriceTracker
-        </h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsSearchOpen(true)}
             className="p-2 text-gray-700 dark:text-gray-300"
             aria-label="Search products"
           >
-            <Icon path={icons.search} className="w-6 h-6" />
+            <Icon path={icons.search} className="w-6 h-6 relative top-px" />
+          </button>
+          <button
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            className="p-2 text-gray-700 dark:text-gray-300"
+          >
+            {theme === "light" ? (
+              <Icon path={icons.moon} className="w-6 h-6" />
+            ) : (
+              <Icon path={icons.sun} className="w-6 h-6 text-yellow-500" />
+            )}
           </button>
           <button
             onClick={() => setShowModal(true)}
