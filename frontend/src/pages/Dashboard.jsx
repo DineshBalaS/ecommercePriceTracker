@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/Authcontext";
 import { useTheme } from "../context/ThemeContext";
 import api from "../api/api"; // Import the pre-configured axios instance
+import MobileNavPanel from "../components/MobileNavPanel";
 
 // --- SVG Icons (No changes needed) ---
 const Icon = ({ path, className = "w-6 h-6" }) => (
@@ -18,6 +19,7 @@ const Icon = ({ path, className = "w-6 h-6" }) => (
 );
 
 const icons = {
+  hamburger: "M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z",
   dashboard:
     "M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375zM1.5 9.75v10.125c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875V9.75M8.25 12a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V12.75A.75.75 0 018.25 12zm3.75 0a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V12.75A.75.75 0 0112 12zm3.75 0a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V12.75A.75.75 0 0115.75 12z",
   watchlist:
@@ -55,6 +57,8 @@ const Dashboard = () => {
   const [productToDelete, setProductToDelete] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
 
@@ -308,6 +312,71 @@ const Dashboard = () => {
   const filteredWatchlist = getFilteredList(watchlist);
   const filteredPurchaseHistory = getFilteredList(purchaseHistory);
 
+  const renderSearchResultsList = () => {
+    const trimmedQuery = searchQuery.trim().toLowerCase();
+
+    // Don't show anything if the query is empty
+    if (!trimmedQuery) {
+      return (
+        <div className="text-center text-gray-400 p-8">
+          Start typing to search your products.
+        </div>
+      );
+    }
+
+    // Combine all products from different tabs into one array
+    const allProducts = [...trackedProducts, ...watchlist, ...purchaseHistory];
+    // Create a unique list of products by ID, in case an item exists in multiple lists
+    const uniqueProducts = Array.from(
+      new Map(allProducts.map((item) => [item["id"], item])).values()
+    );
+    // Filter the unique list based on the search query
+    const searchResults = uniqueProducts.filter((product) =>
+      product.name.toLowerCase().includes(trimmedQuery)
+    );
+
+    if (searchResults.length === 0) {
+      return (
+        <div className="text-center text-gray-400 p-8">
+          No products found for "{searchQuery}".
+        </div>
+      );
+    }
+
+    return (
+      <div className="p-2 space-y-2">
+        {searchResults.map((product) => (
+          <Link
+            key={product.id}
+            to={`/product/${product.id}`}
+            onClick={() => {
+              setIsSearchOpen(false); // Close overlay on selection
+              setSearchQuery(""); // Clear search query
+            }}
+            className="flex items-center gap-3 p-2 w-full bg-white dark:bg-slate-700/50 rounded-lg transition hover:bg-purple-50 dark:hover:bg-slate-600"
+          >
+            <img
+              src={
+                product.image_url ||
+                "https://placehold.co/100x100/F3E8FF/4C1D95?text=Img"
+              }
+              alt={product.name}
+              className="w-12 h-12 object-cover rounded-md flex-shrink-0"
+            />
+            <div className="flex-1 overflow-hidden">
+              <p className="font-semibold text-gray-800 dark:text-gray-100 truncate">
+                {product.name}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {getStoreDisplayName(product)}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    );
+  };
+
   const renderContent = () => {
     if (loading) {
       return (
@@ -337,7 +406,8 @@ const Dashboard = () => {
         );
       }
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
+        <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start p-1 pr-2">
+           {" "}
           {filteredTrackedProducts.map((product) => (
             // MODIFIED -> Wrap the card div with a Link component
             <Link
@@ -471,7 +541,8 @@ const Dashboard = () => {
         );
       }
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-1 md:flex-none min-h-0 overflow-y-auto md:overflow-visible pr-2 content-start">
+           {" "}
           {filteredWatchlist.map((product) => (
             <div
               key={product.id}
@@ -526,7 +597,8 @@ const Dashboard = () => {
         );
       }
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 h-[70vh] overflow-y-auto pr-2 content-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-1 md:flex-none min-h-0 overflow-y-auto md:overflow-visible pr-2 content-start">
+           {" "}
           {purchaseHistory.map((product) => (
             <div
               key={product.id}
@@ -592,7 +664,45 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 font-sans">
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-gray-100 dark:bg-gray-900 font-sans">
+      <MobileNavPanel
+        isOpen={isNavOpen}
+        onClose={() => setIsNavOpen(false)}
+        setActiveTab={setActiveTab}
+        logout={logout}
+        activeTab={activeTab}
+        Icon={Icon}
+        icons={icons}
+      />
+      <header className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-800 border-b dark:border-slate-700 sticky top-0 z-40">
+        <button
+          onClick={() => setIsNavOpen(true)}
+          className="text-gray-700 dark:text-gray-300"
+          aria-label="Open navigation menu"
+        >
+          <Icon path={icons.hamburger} className="w-6 h-6" />
+        </button>
+        <h1 className="text-xl font-bold text-purple-700 dark:text-purple-400">
+          EcomPriceTracker
+        </h1>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            className="p-2 text-gray-700 dark:text-gray-300"
+            aria-label="Search products"
+          >
+            <Icon path={icons.search} className="w-6 h-6" />
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="p-2 bg-purple-700 dark:bg-purple-600 text-white rounded-full"
+            aria-label="Track new product"
+          >
+            <Icon path={icons.add} className="w-5 h-5" />
+          </button>
+        </div>
+      </header>
+
       {/* --- Sidebar --- */}
       <aside className="hidden md:flex md:w-64 flex-shrink-0 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 flex-col">
         <div className="h-16 flex items-center justify-center px-4 border-b border-gray-200 dark:border-slate-700">
@@ -686,8 +796,8 @@ const Dashboard = () => {
       </aside>
 
       {/* --- Main Content --- */}
-      <main className="flex-1 p-8 overflow-y-auto">
-        <header className="flex justify-between items-center mb-8">
+      <main className="flex flex-col flex-1 overflow-hidden p-4 pt-6 md:p-8 md:pt-8 md:overflow-y-auto">
+        <header className="hidden md:flex justify-between items-center mb-8">
           <div>
             <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
               Welcome back!
@@ -758,10 +868,43 @@ const Dashboard = () => {
         {renderContent()}
       </main>
 
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-50 bg-gray-900/70 backdrop-blur-sm md:hidden">
+          <div className="bg-white dark:bg-slate-800 h-full flex flex-col">
+            {/* Search Input Header */}
+            <div className="flex items-center gap-2 p-4 border-b dark:border-slate-700">
+              <Icon
+                path={icons.search}
+                className="w-5 h-5 text-gray-400 dark:text-gray-500"
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search all products..."
+                className="flex-grow bg-transparent text-gray-800 dark:text-gray-200 focus:outline-none"
+                autoFocus
+              />
+              <button
+                onClick={() => setIsSearchOpen(false)}
+                className="text-gray-500 dark:text-gray-400"
+                aria-label="Close search"
+              >
+                Close
+              </button>
+            </div>
+            {/* Search Results */}
+            <div className="flex-1 overflow-y-auto">
+              {renderSearchResultsList()}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* --- Track New Product Modal --- */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl p-8 w-full max-w-md">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl p-6 md:p-8 w-full max-w-md mx-4">
             <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
               Track a New Product
             </h3>
@@ -840,7 +983,7 @@ const Dashboard = () => {
 
       {productToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl p-8 w-full max-w-md mx-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl p-6 md:p-8 w-full max-w-md mx-4">
             <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
               Confirm Deletion
             </h3>

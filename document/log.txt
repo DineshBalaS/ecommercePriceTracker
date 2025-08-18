@@ -497,7 +497,65 @@ Dark mode - >
     - [x] Apply `dark:` variants to the main background and form container.
     - [x] Apply `dark:` variants to input fields, labels, and buttons.
     - [x] Ensure all text colors have sufficient contrast in dark mode.
-- [ ] **index.css**:
-    - [ ] Create a `.dark` parent selector block.
-    - [ ] Add dark-themed `::-webkit-scrollbar-*` rules within the `.dark` block.
-    - [ ] Update the Firefox `scrollbar-color` property for the `.dark` theme.
+- [x] **index.css**:
+    - [x] Create a `.dark` parent selector block.
+    - [x] Add dark-themed `::-webkit-scrollbar-*` rules within the `.dark` block.
+    - [x] Update the Firefox `scrollbar-color` property for the `.dark` theme.
+
+#!/bin/bash
+# Gemini 2.5 Pro - Implementation Plan for Mobile Dashboard UI
+
+echo "✅ Plan generated. Please follow the steps below."
+
+# --- 1. SETUP & STATE MANAGEMENT ---
+# Description: Prepare the Dashboard.jsx component by adding new state and icon assets.
+#
+[x] # In `Dashboard.jsx`, add a new 'hamburger' icon path to the `icons` object.
+#     Path suggestion: 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5'
+[x] # Add state for the mobile navigation panel visibility: const [isNavOpen, setIsNavOpen] = useState(false);
+[x] # Add state for the mobile search overlay visibility: const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+# --- 2. CREATE THE MOBILE NAVIGATION PANEL ---
+# Description: Build the new component for the slide-in menu. It's best to create this as a separate component.
+#
+[x] # Create a new component, e.g., `MobileNavPanel.jsx`.
+[x] # Implement the component to receive props: `isOpen`, `onClose`, `setActiveTab`, `logout`.
+[x] # The component should render a main `div` with a `fixed inset-0 z-50` and use transitions.
+[x] # Add a background overlay `div` inside it with `bg-black/50 backdrop-blur-sm`. Its `onClick` should call `onClose`.
+[x] # Add the slidable panel `div` with styling for positioning, width, background (e.g., `bg-white dark:bg-slate-800`), and a `transform` for the slide effect.
+[x] # Populate the panel with links: "My Watchlist", "Saved for Later", "Purchase History", and "Logout".
+[x] # Ensure link clicks call `setActiveTab('tabname')` and then `onClose()`.
+[x] # Ensure the Logout button calls `logout()` and then `onClose()`.
+[x] # Import and use this new component within `Dashboard.jsx`.
+
+# --- 3. ADAPT THE MAIN LAYOUT FOR MOBILE ---
+# Description: Modify the existing layout to hide desktop elements and add the new mobile header.
+#
+[x] # In `Dashboard.jsx`, hide the desktop sidebar on mobile by changing its class to `hidden md:flex ...`.
+[x] # Below the sidebar, create a new `<header>` for the mobile view with classes like `md:hidden flex items-center justify-between ...`.
+[x] # Add the hamburger button to the new header, which toggles the `isNavOpen` state on click.
+[x] # Add the search icon (🔍) button, which sets `isSearchOpen(true)` on click.
+[x] # Add the circular add (+) icon button, which calls the existing `setShowModal(true)` function on click.
+[x] # In the main content wrapper (`<main>`), change the `p-8` class to `p-4 md:p-8` for better mobile spacing.
+[x] # Hide the existing desktop header section (`<header className="flex justify-between ...">`) on mobile using `hidden md:flex`.
+
+# --- 4. IMPLEMENT THE MOBILE SEARCH OVERLAY ---
+# Description: Create the modal-like search interface for mobile.
+#
+[x] # In `Dashboard.jsx`, conditionally render the search overlay when `isSearchOpen` is true.
+[x] # The overlay should be a `div` with `fixed inset-0 z-50 bg-gray-900/70 backdrop-blur-sm ...`.
+[x] # Inside the overlay, add a search input. It should use the existing `searchQuery` state and `setSearchQuery` function.
+[x] # Add a "Close" button to the overlay that sets `isSearchOpen(false)`.
+[x] # Ensure the search input is styled according to the existing theme (`dark:` variants, focus rings).
+
+# --- 5. FINAL INTEGRITY & ACCESSIBILITY CHECKS ---
+# Description: Verify that all functionality works as expected and is accessible.
+#
+[ ] # Confirm the product grid correctly stacks into a single column on mobile (`grid-cols-1`).
+[ ] # Test the "Track New Product" and "Confirm Deletion" modals to ensure they remain fully functional and scaled correctly.
+[ ] # Add `aria-label` attributes to all new icon-only buttons for screen readers.
+[ ] # Implement focus trapping so that when the Nav Panel or Search Overlay is open, the user cannot tab to elements behind it.
+[ ] # Final code cleanup: remove any console logs and add comments where necessary.
+[ ] # Create the Pull Request.
+
+echo "🚀 Checklist ready. Happy coding!"
