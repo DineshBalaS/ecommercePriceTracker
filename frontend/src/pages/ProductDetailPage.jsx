@@ -231,24 +231,24 @@ const ProductDetailPage = () => {
 
   return (
     <div className="p-8 font-sans bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <header className="mb-8">
-        <Link
-          to="/dashboard"
-          className="text-purple-700 dark:text-purple-400 hover:underline mb-4 block"
-        >
-          &larr; Back to Dashboard
-        </Link>
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
-          {product.name}
-        </h1>
-        <p className="text-lg text-gray-500 dark:text-gray-400">
-          Tracking analysis for your product.
-        </p>
-      </header>
-
-      <VitalsPanel />
-
-      <div className="mt-8 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-8">
+          <Link
+            to="/dashboard"
+            className="text-purple-700 dark:text-purple-400 hover:underline mb-4 block"
+          >
+            &larr; Back to Dashboard
+          </Link>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
+            {product.name}
+          </h1>
+          <p className="text-lg text-gray-500 dark:text-gray-400">
+            Tracking analysis for your product.
+          </p>
+        </header>
+        <VitalsPanel />
+      </div>
+      <div className="max-w-7xl mx-auto mt-8 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
             Price History
@@ -269,7 +269,7 @@ const ProductDetailPage = () => {
             ))}
           </div>
         </div>
-        <div style={{ width: "100%", height: 300 }}>
+        <div style={{ width: "100%", height: "33vh" }}>
           <ResponsiveContainer>
             <AreaChart
               data={chartData}
@@ -334,7 +334,7 @@ const ProductDetailPage = () => {
         </div>
       </div>
 
-      <div className="mt-8 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
+      <div className="max-w-7xl mx-auto mt-8 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
           User Settings
         </h2>
