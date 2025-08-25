@@ -557,4 +557,3 @@ echo "✅ Plan generated. Please follow the steps below."
 [x] # Implement focus trapping so that when the Nav Panel or Search Overlay is open, the user cannot tab to elements behind it.
 [x] # Final code cleanup: remove any console logs and add comments where necessary.
 [x] # Create the Pull Request.
-
