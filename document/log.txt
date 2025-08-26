@@ -72,9 +72,9 @@ Develop a full-stack web application that monitors prices of products across var
 
 ### Tasks
 
-* [ ] Auth UI (login/signup) (yet to link them together)
-* [ ] Dashboard to view tracked products
-* [ ] Forms for adding/editing tracked products
+* [x] Auth UI (login/signup) (yet to link them together)
+* [x] Dashboard to view tracked products
+* [x] Forms for adding/editing tracked products
 
 ---
 
