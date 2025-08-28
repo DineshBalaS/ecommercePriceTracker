@@ -557,3 +557,95 @@ echo "✅ Plan generated. Please follow the steps below."
 [x] # Implement focus trapping so that when the Nav Panel or Search Overlay is open, the user cannot tab to elements behind it.
 [x] # Final code cleanup: remove any console logs and add comments where necessary.
 [x] # Create the Pull Request.
+
+Latest project structure : -
+
+Backend :- 
+
+C:\USERS\DINESH\DOCUMENTS\MP\PRICETRACKERAPP\BACKEND
+│   .env
+│   requirements.txt
+│   tracker.lock
+│   tracker.log
+│   
+└───app
+    │   config.py
+    │   Dockerfile
+    │   main.py
+    │   seed_db.py
+    │   __init__.py
+    │
+    ├───models
+    │   │   product.py
+    │   │   user.py
+    │   │
+    │   └───__pycache__
+    │           product.cpython-311.pyc
+    │           user.cpython-311.pyc
+    │
+    ├───routes
+    │   │   auth.py
+    │   │   product.py
+    │   │
+    │   └───__pycache__
+    │           auth.cpython-311.pyc
+    │           product.cpython-311.pyc
+    │
+    ├───services
+    │   │   auth_utils.py
+    │   │   flipkart_scraper.py
+    │   │   scraper.py
+    │   │   scraper_dispatcher.py
+    │   │   tracker.py
+    │   │
+    │   └───__pycache__
+    │           auth_utils.cpython-311.pyc
+    │           flipkart_scraper.cpython-311.pyc
+    │           notification_service.cpython-311.pyc
+    │           scraper.cpython-311.pyc
+    │           scraper_dispatcher.cpython-311.pyc
+    │           tracker.cpython-311.pyc
+    │
+    ├───utils
+    │   │   logger.py
+    │   │   mongo.py
+    │   │   objectid.py
+    │   │
+    │   └───__pycache__
+    │           logger.cpython-311.pyc
+    │           mongo.cpython-311.pyc
+    │           objectid.cpython-311.pyc
+    │
+    └───__pycache__
+            config.cpython-311.pyc
+            main.cpython-311.pyc
+            __init__.cpython-311.pyc
+
+Frontend : -
+
+C:\USERS\DINESH\DOCUMENTS\MP\PRICETRACKERAPP\FRONTEND\SRC
+│   App.css
+│   App.js
+│   App.test.js
+│   index.css
+│   index.js
+│   logo.svg
+│   reportWebVitals.js
+│   setupTests.js
+│
+├───api
+│       api.js
+│
+├───components
+│       Login.jsx
+│       MobileNavPanel.jsx
+│       ProtectedRoute.jsx
+│       Signup.jsx
+│
+├───context
+│       Authcontext.js
+│       ThemeContext.js
+│
+└───pages
+        Dashboard.jsx
+        ProductDetailPage.jsx
