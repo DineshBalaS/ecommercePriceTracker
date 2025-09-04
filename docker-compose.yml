@@ -6,8 +6,8 @@ services:
       context: ./backend
       dockerfile: app/Dockerfile
     restart: always
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/mydatabase
+    env_file:
+      - ./docker.env
     depends_on:
       - mongo
     networks:
