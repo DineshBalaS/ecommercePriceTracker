@@ -13,5 +13,8 @@ FROM nginx:stable-alpine
 COPY --from=build /app/build /usr/share/nginx/html
 # Expose port 80 for Nginx
 EXPOSE 80
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Nginx is started by default when the container runs
 CMD ["nginx", "-g", "daemon off;"]
