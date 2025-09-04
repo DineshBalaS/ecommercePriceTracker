@@ -4,17 +4,18 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: app/Dockerfile
+      dockerfile: app/Dockerfile # Specifies the path to the Dockerfile
     restart: always
     environment:
-      - MONGO_URI=mongodb://mongo:27017/mydatabase
+      # We will connect to the 'mongo' service defined below
+      - MONGO_URI=mongodb://mongo:27017/mydatabase 
     depends_on:
       - mongo
     networks:
       - app-network
 
   frontend:
-    build: ./frontend
+    build: ./frontend # Assumes the frontend Dockerfile is in the 'frontend' folder
     restart: always
     networks:
       - app-network
@@ -23,7 +24,7 @@ services:
     image: mongo:latest
     restart: always
     volumes:
-      - mongo-data:/data/db
+      - mongo-data:/data/db # Persists database data on the EC2 host
     networks:
       - app-network
 
@@ -31,9 +32,9 @@ services:
     image: nginx:stable-alpine
     restart: always
     ports:
-      - "4533:80" # <-- This is the only line changed
+      - "80:80" # Expose port 80 to the world
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf # We'll create this file next
     depends_on:
       - frontend
       - backend
