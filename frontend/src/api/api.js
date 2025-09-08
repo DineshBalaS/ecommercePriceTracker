@@ -6,7 +6,7 @@ import axios from "axios";
 const api = axios.create({
   baseURL: "http://localhost:8000", // Update this if you host backend elsewhere
   withCredentials: true, // Send cookies with requests
-  headers: {
+  headers: {  
     "Content-Type": "application/json",
   },
 });

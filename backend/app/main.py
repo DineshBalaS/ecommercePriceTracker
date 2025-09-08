@@ -22,16 +22,28 @@ from backend.app.services.tracker import run_price_tracker
 
 app = FastAPI()
 
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://your_default_frontend_url")
+
+@app.middleware("http")
+async def debug_request_middleware(request: Request, call_next):
+    print(f"✅ DEBUG: Incoming request: {request.method} {request.url.path}")
+    try:
+        response = await call_next(request)
+        return response
+    except Exception as e:
+        print(f"❌ DEBUG: Error processing request: {request.method} {request.url.path} - {e}")
+        raise
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # frontend dev server
+    allow_origins=["http://localhost:3000", FRONTEND_URL],  # frontend dev server
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(auth_router, prefix="/auth", tags=["Authentication"])
-app.include_router(product_router, prefix="/products", tags=["Products"])
+app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(product_router, prefix="/api/products", tags=["Products"])
 
 @app.get('/')
 def read_root():
